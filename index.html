@@ -269,6 +269,9 @@
         </div>
     </div>
 
+    <audio id="backgroundMusic" src="music.wav" loop></audio>
+    <audio id="voiceAudio"></audio>
+
     <script>
         let currentStoryIndex = 0;
         let isDownloading = false;
@@ -276,6 +279,10 @@
         const DOWNLOAD_DURATION = 120000; // 2 dakika (miliseconds)
         const DOWNLOAD_INTERVAL = 100; // Her 100ms'de bir güncelle
         const TYPING_SPEED = 60; // Metin yazma hızı (ms cinsinden, düşük sayı daha hızlı)
+
+        // Audio elements
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const voiceAudio = document.getElementById('voiceAudio');
 
         // Matrix efekti
         const canvas = document.getElementById('matrix');
@@ -311,41 +318,63 @@
 
         setInterval(drawMatrix, 35);
 
-        // Ses çalma fonksiyonu
-        // NOT: Sadece tek bir 'audio.wav' dosyanız olduğu varsayıldı.
-        // Bu dosyanın index.html ile AYNI DİZİNDE olduğundan emin olun.
-        function playAudio() { // Artık parametre almıyor
-            console.log(`Playing audio: audio.wav`);
-            try {
-                const audio = new Audio(`audio.wav`); // Her zaman 'audio.wav' dosyasını çalar
-                audio.volume = 0.5; // Ses seviyesini ayarlayabilirsiniz (0.0 ile 1.0 arası)
-                audio.play().catch(e => {
-                    console.warn(`Audio play failed for audio.wav:`, e);
-                    // Oynatma hatası, genellikle kullanıcı etkileşimi olmadan otomatik oynatma denemesi
-                    // Tarayıcılar bu konuda kısıtlayıcıdır. İlk kullanıcı tıklamasından sonra daha iyi çalışır.
+        /**
+         * Ses dosyasını çalar.
+         * @param {string} filename Çalınacak ses dosyasının adı (örn: "audio1.wav").
+         * @returns {Promise<void>} Sesin çalma işlemi tamamlandığında çözümlenen bir Promise.
+         */
+        function playVoiceAudio(filename) {
+            return new Promise((resolve, reject) => {
+                voiceAudio.src = filename;
+                voiceAudio.volume = 0.8; // Ses seviyesini ayarlayabilirsiniz
+                voiceAudio.onended = () => resolve(); // Ses bittiğinde Promise'i çöz
+                voiceAudio.onerror = (e) => {
+                    console.error(`Error playing ${filename}:`, e);
+                    reject(e);
+                };
+                voiceAudio.play().catch(e => {
+                    console.warn(`Auto-play prevented for ${filename}. User interaction might be needed.`, e);
+                    reject(e); // Oynatma başarısız olursa da Promise'i reddet
                 });
-            } catch (error) {
-                console.error(`Error creating Audio object for audio.wav:`, error);
+            });
+        }
+
+        /**
+         * Arka plan müziğini oynatır veya duraklatır.
+         * @param {boolean} play True ise oynat, false ise duraklat.
+         */
+        function toggleBackgroundMusic(play) {
+            if (play) {
+                backgroundMusic.volume = 0.3; // Arka plan müziği için daha düşük ses
+                backgroundMusic.play().catch(e => {
+                    console.warn("Background music auto-play prevented. User interaction might be needed.", e);
+                });
+            } else {
+                backgroundMusic.pause();
             }
         }
 
         // Başlangıç yüklemesi
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-            playAudio(); // Parametre olmadan çağırılıyor
-        }, 3000);
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('mainMenu').style.display = 'block';
+                // İlk kullanıcı etkileşimi için arka plan müziğini burada başlatmaya çalışın
+                toggleBackgroundMusic(true);
+            }, 3000);
+        });
 
         function startGame() {
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
-            playAudio(); // Parametre olmadan çağırılıyor
+            toggleBackgroundMusic(true); // Oyuna başlarken müziği çalmaya devam et
             startStory();
         }
 
         function showDeveloper() {
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('developerScreen').style.display = 'block';
+            toggleBackgroundMusic(true); // Geliştirici ekranında da müzik çalsın
         }
 
         function goBack() {
@@ -359,52 +388,53 @@
             isDownloading = false;
             downloadProgress = 0;
             document.getElementById('progressFill').style.width = '0%';
+            toggleBackgroundMusic(true);
         }
 
         const storyTexts = [
             {
                 text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)",
-                audio: "audio" // Her yerde "audio" olarak belirtildi
+                audio: "audio1.wav"
             },
             {
-                text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK  \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
-                audio: "audio"
+                text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK  \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
+                audio: "audio2.wav"
             },
             {
                 text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele",
-                audio: "audio"
+                audio: "audio3.wav"
             },
             {
                 text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz",
-                audio: "audio"
+                audio: "audio4.wav"
             },
             {
                 text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir",
-                audio: "audio"
+                audio: "audio5.wav"
             },
             {
                 text: "VERİLER İNDİRİLİYOR...\nLütfen bekle. Bu işlem biraz zaman alabilir.\n",
-                audio: "audio"
+                audio: "audio6.wav" // İndirme başlarken çalacak ses
             },
             {
                 text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et",
-                audio: "audio"
+                audio: "audio7.wav" // Yeni ses dosyası
             },
             {
                 text: "VERİ ANALİZİ BAŞLATILIYOR...\n\n[SİSTEM] Şifreleme algoritmaları çözülüyor...\n[DURUM] Derinlemesine tarama yapılıyor...\n\n[ANALİZ SONUCU] NEXUS CORP'un sadece nanobot projesi değil, aynı zamanda küresel finans piyasalarını manipüle eden 'Project Midas' adında bir girişimi daha var!\n\n[GHOST] Bu bilgi çok değerli! Ama izimizi kaybettirmeliyiz. Sistemdeki logları ve bağlantı kayıtlarını temizlememiz şart.\n\nKomut: 'clear logs' yazarak izlerini sil",
-                audio: "audio"
+                audio: "audio8.wav" // Yeni ses dosyası
             },
             {
                 text: "İZ SİLME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Bağlantı logları siliniyor...\n[SİSTEM] Geçici dosyalar temizleniyor...\n[BAŞARILI] Tüm dijital ayak izlerin silindi!\n\n[UYARI] NEXUS CORP'un güvenlik önlemleri artırıldı! Yeni bir anti-hacker protokolü aktifleşti!\n\n[GHOST] Mükemmel zamanlama. Son bir görevimiz var: Acil durum kaçış protokolünü etkinleştirmek ve sistemden güvenle çıkmak. Aksi takdirde yakalanabiliriz!\n\nKomut: 'escape now' yazarak acil çıkış protokolünü başlat",
-                audio: "audio"
+                audio: "audio9.wav" // Yeni ses dosyası
             },
             {
                 text: "ACİL ÇIKIŞ PROTOKOLÜ BAŞLATILIYOR...\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa etme yolunda çok önemli bir adım attın ve kendini de güvende tuttun. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR...",
-                audio: "audio"
+                audio: "audio1.wav" // Başa dönebilir veya son bir ses çalabilir
             }
         ];
 
-        function typeText(text, elementId, callback) {
+        async function typeText(text, elementId, callback) {
             const element = document.getElementById(elementId);
             element.innerHTML = '';
             let i = 0;
@@ -417,7 +447,7 @@
                         element.innerHTML += text[i];
                     }
                     i++;
-                    setTimeout(typeChar, TYPING_SPEED + Math.random() * 20); // TYPING_SPEED kullanıldı
+                    setTimeout(typeChar, TYPING_SPEED + Math.random() * 20);
                 } else {
                     const existingCursor = element.querySelector('.cursor');
                     if (existingCursor) existingCursor.remove();
@@ -432,18 +462,24 @@
             typeChar();
         }
 
-        function startStory() {
+        async function startStory() {
             if (currentStoryIndex < storyTexts.length) {
                 const story = storyTexts[currentStoryIndex];
-                playAudio(); // Parametre olmadan çağırılıyor
 
-                if (currentStoryIndex === 5) { // "download all" komutundan sonraki indeks
+                // Ses dosyasını çal ve bitmesini bekle
+                try {
+                    await playVoiceAudio(story.audio);
+                } catch (e) {
+                    console.log("Ses çalma hatası, metin yazmaya devam ediliyor.");
+                }
+
+                if (currentStoryIndex === 5) { // "download all" komutundan sonraki indeks (audio6.wav)
                     isDownloading = true;
                     document.getElementById('inputArea').style.display = 'none';
                     document.getElementById('downloadStatus').style.display = 'block';
                     document.getElementById('downloadText').innerText = story.text;
                     startDownloadSimulation();
-                } else if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length - 1 || currentStoryIndex === storyTexts.length - 2) {
+                } else if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length - 1) { // Giriş ve son kapanış aşamaları
                     typeText(story.text, 'storyText', () => {
                         document.getElementById('inputArea').style.display = 'none';
                         setTimeout(() => {
@@ -470,9 +506,9 @@
             let interval = setInterval(() => {
                 let elapsedTime = Date.now() - startTime;
                 downloadProgress = (elapsedTime / DOWNLOAD_DURATION) * 100;
-                
+
                 document.getElementById('progressFill').style.width = `${downloadProgress}%`;
-                
+
                 document.getElementById('downloadText').innerText = `VERİLER İNDİRİLİYOR...\nLütfen bekle. İlerleme: %${Math.floor(downloadProgress)}`;
 
                 if (downloadProgress >= 100) {
@@ -490,7 +526,6 @@
             }, DOWNLOAD_INTERVAL);
         }
 
-
         function handleCommand(event) {
             if (event.key === 'Enter' && !isDownloading) {
                 const command = event.target.value.toLowerCase().trim();
@@ -499,7 +534,9 @@
 
                 let commandHandled = false;
 
-                if (currentStoryIndex === 1 && command.includes('port')) {
+                if (currentStoryIndex === 0 && command === '') { // İlk ekran için boş Enter
+                    commandHandled = true;
+                } else if (currentStoryIndex === 1 && command.includes('port')) {
                     missionStatus.style.display = 'block';
                     missionStatus.innerHTML = '<span class="success">✅ PORT SALDIRISI BAŞARILI!</span>';
                     commandHandled = true;
