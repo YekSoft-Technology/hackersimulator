@@ -13,17 +13,21 @@
 
         body {
             background: #000;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
+            color: #00ff00; /* Klasik yeşil hacker rengi */
+            font-family: 'Consolas', 'Courier New', monospace; /* Daha CMD benzeri font */
             overflow: hidden;
             height: 100vh;
-        }
-
-        .container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
         }
 
@@ -50,7 +54,7 @@
             left: 50px;
             font-size: 2rem;
             color: #00ff00;
-            text-shadow: 0 0 10px #00ff00;
+            text-shadow: none; /* CMD'de gölge olmaz */
         }
 
         .menu-options {
@@ -63,79 +67,89 @@
             cursor: pointer;
             padding: 10px;
             border: 2px solid transparent;
-            transition: all 0.3s;
+            transition: all 0.1s; /* Daha hızlı geçiş */
         }
 
         .menu-item:hover {
             border: 2px solid #00ff00;
             background: rgba(0, 255, 0, 0.1);
-            text-shadow: 0 0 10px #00ff00;
+            text-shadow: 0 0 5px #00ff00; /* Hafif bir parıltı bırakabiliriz */
         }
 
         .game-screen {
             display: none;
-            padding: 20px;
-            width: 100%;
-            height: 100vh;
+            padding: 10px; /* Daha az padding, CMD hissi için */
+            width: 95%; /* Biraz daha dar */
+            height: 95vh; /* Yüksekliği ekranın büyük kısmını kaplasın */
             overflow-y: auto;
+            background: #000; /* Tamamen siyah */
+            color: #00ff00;
+            border: none; /* Çerçeve yok */
+            border-radius: 0; /* Köşeler düz */
+            box-shadow: none; /* Gölge yok */
         }
 
         .terminal {
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #00ff00;
-            padding: 20px;
-            border-radius: 10px;
-            min-height: 80vh;
-            box-shadow: 0 0 20px #00ff00;
+            background: #000; /* Tamamen siyah */
+            padding: 0; /* Kendi iç padding'i olmayacak */
+            border-radius: 0;
+            min-height: 100%; /* Tam yüksekliği kaplasın */
+            box-shadow: none;
         }
 
         .story-text {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            white-space: pre-wrap; /* To preserve newlines from \n */
+            font-size: 1.1rem; /* Hafif küçültme */
+            line-height: 1.5;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-break: break-word; /* Uzun kelimeleri kır */
+            padding: 0 5px; /* Kenarlardan biraz boşluk */
         }
 
         .input-area {
-            margin-top: 20px;
+            margin-top: 10px;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Prompt üstte kalsın */
+            padding: 0 5px;
         }
 
         .prompt {
-            color: #ff0000;
-            margin-right: 10px;
+            color: #ffffff; /* Prompt beyaz olsun (CMD'de genelde beyaz veya açık gri) */
+            margin-right: 8px;
+            flex-shrink: 0; /* Prompt küçülmesin */
+            font-weight: bold; /* Daha belirgin */
         }
 
         input {
             background: transparent;
             border: none;
             color: #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1.1rem;
             outline: none;
             flex: 1;
             caret-color: #00ff00;
+            padding: 0; /* Ekstra padding olmasın */
         }
 
         .back-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             background: transparent;
-            border: 2px solid #ff0000;
+            border: 1px solid #ff0000; /* İnce kırmızı çerçeve */
             color: #ff0000;
-            padding: 10px 20px;
+            padding: 5px 10px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            border-radius: 5px;
-            transition: all 0.3s;
-            z-index: 10; /* Ensure it's above other elements */
+            font-family: 'Consolas', 'Courier New', monospace;
+            border-radius: 0; /* Düz köşeler */
+            transition: all 0.1s;
+            z-index: 10;
         }
 
         .back-btn:hover {
-            background: rgba(255, 0, 0, 0.1);
-            text-shadow: 0 0 10px #ff0000;
+            background: rgba(255, 0, 0, 0.2); /* Hafif kırmızı vurgu */
+            text-shadow: none;
         }
 
         .developer-screen {
@@ -145,9 +159,9 @@
         }
 
         .dev-info {
-            font-size: 2rem;
+            font-size: 1.8rem; /* Biraz küçültme */
             margin-bottom: 30px;
-            text-shadow: 0 0 10px #00ff00;
+            text-shadow: none;
         }
 
         .cursor {
@@ -165,29 +179,42 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.1;
+            opacity: 0.07; /* Daha az belirgin */
         }
 
         .mission-status {
-            border: 1px solid #00ff00;
-            padding: 15px;
-            margin: 20px 0;
-            background: rgba(0, 255, 0, 0.05);
+            border: none; /* Çerçeve yok */
+            padding: 10px 5px; /* Minimal padding */
+            margin: 10px 0;
+            background: transparent; /* Arka plan yok */
         }
 
         .success {
             color: #00ff00;
-            text-shadow: 0 0 10px #00ff00;
         }
 
         .warning {
             color: #ffff00;
-            text-shadow: 0 0 10px #ffff00;
         }
 
         .error {
             color: #ff0000;
-            text-shadow: 0 0 10px #ff0000;
+        }
+
+        /* İndirme çubuğu stili */
+        .progress-bar {
+            width: 100%;
+            background-color: #333;
+            border: 1px solid #00ff00;
+            height: 20px;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: #00ff00;
+            transition: width 0.1s linear; /* Yumuşak geçiş */
         }
     </style>
 </head>
@@ -210,10 +237,16 @@
             <div class="terminal">
                 <div class="story-text" id="storyText"></div>
                 <div class="input-area" id="inputArea" style="display: none;">
-                    <span class="prompt">root@matrix:~$</span>
-                    <input type="text" id="commandInput" onkeypress="handleCommand(event)" placeholder="Komut girin...">
+                    <span class="prompt">C:\USERS\HACKER&gt;</span>
+                    <input type="text" id="commandInput" onkeypress="handleCommand(event)" placeholder="">
                 </div>
                 <div class="mission-status" id="missionStatus" style="display: none;"></div>
+                <div class="download-status" id="downloadStatus" style="display: none;">
+                    <div class="story-text" id="downloadText"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -238,6 +271,10 @@
 
     <script>
         let currentStoryIndex = 0;
+        let isDownloading = false;
+        let downloadProgress = 0;
+        const DOWNLOAD_DURATION = 120000; // 2 dakika (miliseconds)
+        const DOWNLOAD_INTERVAL = 100; // Her 100ms'de bir güncelle
 
         // Matrix efekti
         const canvas = document.getElementById('matrix');
@@ -245,7 +282,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const characters = '01アカサタナハマヤラワガザダバパイキシチニヒミリギジヂビピウクスツヌフムユルグズヅブプエケセテネヘメレゲゼデベペオコソトノホモヨロゴゾドボポヴッン';
+        const characters = '01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ'; // Japon Katakana ve sayılar
         const fontSize = 14;
         const columns = canvas.width / fontSize;
         const drops = [];
@@ -274,11 +311,22 @@
         setInterval(drawMatrix, 35);
 
         // Ses çalma fonksiyonu
+        // NOT: Ses dosyalarınızın (örneğin audio_intro.wav, audio_story_1.wav vb.)
+        // index.html dosyasıyla AYNI DİZİNDE olduğundan emin olun.
+        // GitHub Pages'da bu şekilde sorunsuz çalışacaktır.
         function playAudio(audioName) {
             console.log(`Playing audio: ${audioName}.wav`);
-            // Klasör belirtmeden, index.html ile aynı dizindeki dosyayı çağırıyoruz.
-            const audio = new Audio(`${audioName}.wav`);
-            audio.play().catch(e => console.log('Audio play failed:', e));
+            try {
+                const audio = new Audio(`${audioName}.wav`);
+                audio.volume = 0.5; // Ses seviyesini ayarlayabilirsiniz
+                audio.play().catch(e => {
+                    console.warn(`Audio play failed for ${audioName}.wav:`, e);
+                    // Oynatma hatası, genellikle kullanıcı etkileşimi olmadan otomatik oynatma denemesi
+                    // Tarayıcılar bu konuda kısıtlayıcıdır. İlk kullanıcı tıklamasından sonra daha iyi çalışır.
+                });
+            } catch (error) {
+                console.error(`Error creating Audio object for ${audioName}.wav:`, error);
+            }
         }
 
         // Başlangıç yüklemesi
@@ -307,44 +355,52 @@
             currentStoryIndex = 0;
             document.getElementById('inputArea').style.display = 'none';
             document.getElementById('missionStatus').style.display = 'none';
+            document.getElementById('downloadStatus').style.display = 'none'; // İndirme durumunu sıfırla
+            isDownloading = false;
+            downloadProgress = 0;
+            document.getElementById('progressFill').style.width = '0%';
         }
 
         const storyTexts = [
             {
                 text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)",
-                audio: "audio_story_1" // audio_story_1.wav
+                audio: "audio_story_1"
             },
             {
                 text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK  \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
-                audio: "audio_story_2" // audio_story_2.wav
+                audio: "audio_story_2"
             },
             {
                 text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele",
-                audio: "audio_story_3" // audio_story_3.wav
+                audio: "audio_story_3"
             },
             {
                 text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz",
-                audio: "audio_story_4" // audio_story_4.wav
+                audio: "audio_story_4"
             },
             {
                 text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir",
-                audio: "audio_story_5" // audio_story_5.wav
+                audio: "audio_story_5"
             },
             {
-                text: "İNDİRME BAŞLADI...\n\n[████████████████████████████████] 100%\n\n✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et",
-                audio: "audio_story_6" // audio_story_6.wav
+                text: "VERİLER İNDİRİLİYOR...\nLütfen bekle. Bu işlem biraz zaman alabilir.\n", // İndirme metni kısaldı
+                audio: "audio_download_start"
+            },
+            {
+                text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et",
+                audio: "audio_story_6"
             },
             {
                 text: "VERİ ANALİZİ BAŞLATILIYOR...\n\n[SİSTEM] Şifreleme algoritmaları çözülüyor...\n[DURUM] Derinlemesine tarama yapılıyor...\n\n[ANALİZ SONUCU] NEXUS CORP'un sadece nanobot projesi değil, aynı zamanda küresel finans piyasalarını manipüle eden 'Project Midas' adında bir girişimi daha var!\n\n[GHOST] Bu bilgi çok değerli! Ama izimizi kaybettirmeliyiz. Sistemdeki logları ve bağlantı kayıtlarını temizlememiz şart.\n\nKomut: 'clear logs' yazarak izlerini sil",
-                audio: "audio_story_7" // audio_story_7.wav
+                audio: "audio_story_7"
             },
             {
                 text: "İZ SİLME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Bağlantı logları siliniyor...\n[SİSTEM] Geçici dosyalar temizleniyor...\n[BAŞARILI] Tüm dijital ayak izlerin silindi!\n\n[UYARI] NEXUS CORP'un güvenlik önlemleri artırıldı! Yeni bir anti-hacker protokolü aktifleşti!\n\n[GHOST] Mükemmel zamanlama. Son bir görevimiz var: Acil durum kaçış protokolünü etkinleştirmek ve sistemden güvenle çıkmak. Aksi takdirde yakalanabiliriz!\n\nKomut: 'escape now' yazarak acil çıkış protokolünü başlat",
-                audio: "audio_story_8" // audio_story_8.wav
+                audio: "audio_story_8"
             },
             {
-                text: "ACİL ÇIKIŞ PROTOKOLÜ BAŞLATILIYOR...\n\n[████████████████████████████████] 100%\n\n✅ SİSTEMDEN BAŞARILI BİR ŞEKİLDE ÇIKIŞ YAPILDI!\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa etme yolunda çok önemli bir adım attın ve kendini de güvende tuttun. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR...",
-                audio: "audio_final" // audio_final.wav
+                text: "ACİL ÇIKIŞ PROTOKOLÜ BAŞLATILIYOR...\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa etme yolunda çok önemli bir adım attın ve kendini de güvende tuttun. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR...",
+                audio: "audio_final"
             }
         ];
 
@@ -365,7 +421,12 @@
                 } else {
                     const existingCursor = element.querySelector('.cursor');
                     if (existingCursor) existingCursor.remove();
-                    element.innerHTML += '<span class="cursor">_</span>';
+                    // input alanı görünür olduğunda cursoru input'a ekle
+                    if (elementId === 'storyText' && document.getElementById('inputArea').style.display === 'flex') {
+                        document.getElementById('commandInput').focus(); // Input'a odaklan
+                    } else {
+                        element.innerHTML += '<span class="cursor">_</span>';
+                    }
                     if (callback) callback();
                 }
             }
@@ -377,7 +438,15 @@
                 const story = storyTexts[currentStoryIndex];
                 playAudio(story.audio);
 
-                if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length - 1) {
+                // İndirme aşaması özel olarak ele alınıyor
+                if (currentStoryIndex === 5) { // "download all" komutundan sonraki indeks
+                    isDownloading = true;
+                    document.getElementById('inputArea').style.display = 'none';
+                    document.getElementById('downloadStatus').style.display = 'block';
+                    document.getElementById('downloadText').innerText = story.text;
+                    startDownloadSimulation();
+                } else if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length - 1 || currentStoryIndex === storyTexts.length - 2) {
+                    // İlk giriş, son kapanış ve sondan bir önceki (escape now) otomatik devam etmeli
                     typeText(story.text, 'storyText', () => {
                         document.getElementById('inputArea').style.display = 'none';
                         setTimeout(() => {
@@ -399,8 +468,35 @@
             }
         }
 
+        function startDownloadSimulation() {
+            let startTime = Date.now();
+            let interval = setInterval(() => {
+                let elapsedTime = Date.now() - startTime;
+                downloadProgress = (elapsedTime / DOWNLOAD_DURATION) * 100;
+                
+                document.getElementById('progressFill').style.width = `${downloadProgress}%`;
+                
+                // İndirme metnini yüzde ile güncelle
+                document.getElementById('downloadText').innerText = `VERİLER İNDİRİLİYOR...\nLütfen bekle. İlerleme: %${Math.floor(downloadProgress)}`;
+
+                if (downloadProgress >= 100) {
+                    clearInterval(interval);
+                    isDownloading = false;
+                    document.getElementById('downloadStatus').style.display = 'none';
+                    document.getElementById('missionStatus').style.display = 'block';
+                    document.getElementById('missionStatus').innerHTML = '<span class="success">✅ İNDİRME TAMAMLANDI!</span>';
+                    setTimeout(() => {
+                        currentStoryIndex++;
+                        startStory();
+                        document.getElementById('missionStatus').style.display = 'none';
+                    }, 1500);
+                }
+            }, DOWNLOAD_INTERVAL);
+        }
+
+
         function handleCommand(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && !isDownloading) {
                 const command = event.target.value.toLowerCase().trim();
                 const missionStatus = document.getElementById('missionStatus');
                 event.target.value = '';
@@ -422,22 +518,22 @@
                     missionStatus.innerHTML = '<span class="warning">⚠️ GİZLİ DOSYALAR ERİŞİLDİ!</span>';
                     commandHandled = true;
                 }
-                else if (currentStoryIndex === 4 && command.includes('download')) {
+                else if (currentStoryIndex === 4 && command.includes('download all')) {
                     missionStatus.style.display = 'block';
-                    missionStatus.innerHTML = '<span class="success">✅ VERİLER İNDİRİLİYOR...</span>';
+                    missionStatus.innerHTML = '<span class="success">✅ İNDİRME BAŞLATILIYOR...</span>';
                     commandHandled = true;
                 }
-                else if (currentStoryIndex === 5 && command.includes('analyze data')) {
+                else if (currentStoryIndex === 6 && command.includes('analyze data')) { // İndirme bittikten sonraki indeks
                     missionStatus.style.display = 'block';
                     missionStatus.innerHTML = '<span class="success">✅ VERİ ANALİZİ BAŞLADI!</span>';
                     commandHandled = true;
                 }
-                else if (currentStoryIndex === 6 && command.includes('clear logs')) {
+                else if (currentStoryIndex === 7 && command.includes('clear logs')) {
                     missionStatus.style.display = 'block';
                     missionStatus.innerHTML = '<span class="success">✅ İZLER TEMİZLENİYOR!</span>';
                     commandHandled = true;
                 }
-                else if (currentStoryIndex === 7 && command.includes('escape now')) {
+                else if (currentStoryIndex === 8 && command.includes('escape now')) {
                     missionStatus.style.display = 'block';
                     missionStatus.innerHTML = '<span class="success">🎉 ACİL ÇIKIŞ BAŞARILI!</span>';
                     commandHandled = true;
