@@ -389,6 +389,7 @@ function goBack() {
 
 // Story data with text (audio properties removed as requested)
 const storyTexts = [
+ const storyTexts = [
     {
         text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)"
     },
@@ -410,25 +411,35 @@ const storyTexts = [
     {
         text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et"
     },
-    // Yeni Hikaye Adımları Başlangıcı
     {
-        text: "VERİ ANALİZİ TAMAMLANDI!\n\n[BİLGİ] İndirilen veriler şifreli. Şifreleme algoritması: 'Quantum-X'.\n[GHOST] Bu şifrelemeyi kırmak için özel bir algoritma çalıştırmamız gerekiyor. Normal yöntemlerle çok uzun sürer.\n\nKomut: 'decrypt data' yazarak şifre çözme işlemini başlat",
+        text: "VERİ ANALİZİ TAMAMLANDI!\n\n[BİLGİ] İndirilen veriler şifreli. Şifreleme algoritması: 'Quantum-X'.\n[GHOST] Bu şifrelemeyi kırmak için özel bir algoritma çalıştırmamız gerekiyor. Normal yöntemlerle çok uzun sürer. Sistemin derinliklerinde gizlenmiş bir anahtar buldum: 'Project Chimera'nın eski bir test protokolü.\n\nKomut: 'decrypt data' yazarak şifre çözme işlemini başlat"
     },
     {
-        text: "ŞİFRE ÇÖZME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Kuantum şifre çözücü aktif edildi...\n[DURUM] Veri blokları işleniyor...\n\n[BAŞARILI] Şifre çözme tamamlandı! Gizli veriler artık okunabilir durumda.\n\n[GHOST] Harika iş! Şimdi bu veriler bize NEXUS CORP'un ana sunucusuna erişim için zayıf bir nokta gösteriyor. Onların tüm operasyonlarını durdurmalıyız!\n\nKomut: 'takeover server' yazarak ana sunucuyu ele geçir",
+        text: "ŞİFRE ÇÖZME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Kuantum şifre çözücü aktif edildi...\n[DURUM] Veri blokları işleniyor...\n[BAŞARILI] Şifre çözme tamamlandı! Gizli veriler artık okunabilir durumda.\n\n[GHOST] Harika iş! Şimdi bu veriler bize NEXUS CORP'un ana sunucusuna erişim için zayıf bir nokta gösteriyor: Kripto-finans birimlerinin kullandığı eski bir açık. Ayrıca, 'Project Chronos' adında zaman manipülasyonu üzerine çalıştıklarını da öğrendik! Bu çok daha tehlikeli!\n\nKomut: 'takeover server' yazarak ana sunucuyu ele geçir"
     },
     {
-        text: "ANA SUNUCU ELE GEÇİRİLİYOR...\n\n[SİSTEM] Güvenlik protokolleri bypass ediliyor...\n[DURUM] Yönetici ayrıcalıkları elde ediliyor...\n\n[BAŞARILI] NEXUS CORP'un ana sunucusu ele geçirildi!\n\n[GHOST] Artık tüm kontrol bizde! Bu bilgileri dünyaya duyurmalıyız. Medyaya sızdırarak NEXUS CORP'un karanlık yüzünü ifşa etmeliyiz.\n\nKomut: 'leak data' yazarak verileri dünyaya sızdır",
+        text: "ANA SUNUCU ELE GEÇİRİLİYOR...\n\n[SİSTEM] Güvenlik protokolleri bypass ediliyor...\n[DURUM] Yönetici ayrıcalıkları elde ediliyor...\n[BAŞARILI] NEXUS CORP'un ana sunucusu ele geçirildi!\n\n[GHOST] Artık tüm kontrol bizde! Ancak, 'Project Chronos' verileri ayrı bir yedek sunucuda tutuluyor. Onu da ele geçirmeliyiz ki, bu korkunç teknoloji asla kullanılamasın.\n\nKomut: 'locate backup' yazarak yedek sunucuyu bul"
     },
     {
-        text: "VERİLER DÜNYAYA SIZDIRILIYOR...\n\n[SİSTEM] Küresel medya ağlarına bağlantı kuruluyor...\n[DURUM] Veri paketleri gönderiliyor...\n\n[BAŞARILI] Tüm veriler sızdırıldı! Dünya artık NEXUS CORP'un gerçek yüzünü biliyor.\n\n[UYARI] NEXUS CORP'un karşı saldırısı başladı! Tüm siber birimleri sana odaklandı!\n[ACİL] Konumun tespit ediliyor!\n\n[GHOST] Son bir hamle! İz bırakmadan sistemden tamamen çıkmalıyız. En gelişmiş gizlenme protokolünü kullanacağız.\n\nKomut: 'initiate stealth' yazarak gizlenme protokolünü başlat",
+        text: "YEDEK SUNUCU TESPİT EDİLİYOR...\n\n[SİSTEM] Ağ topolojisi taranıyor...\n[DURUM] Gizli bağlantılar analiz ediliyor...\n[BAŞARILI] Yedek sunucu konumu tespit edildi: 'Arctic Vault 7'. Çok iyi korunuyor.\n\n[GHOST] Buraya uzaktan erişim sağlamamız imkansız. Fiziksel bir sızma yapmalıyız. Neyse ki, NEXUS CORP'un eski bir çalışanı olan 'Shadow' ile temas kurdum. Bize içeriden yardım edebilir.\n\nKomut: 'contact shadow' yazarak Shadow ile iletişime geç"
     },
     {
-        text: "GİZLENME PROTOKOLÜ BAŞLATILIYOR...\n\n[SİSTEM] Dijital ayak izleri siliniyor...\n[SİSTEM] Bağlantı tünelleri kapatılıyor...\n[BAŞARILI] Tamamen görünmez oldun!\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa ettin ve kendin de güvende kaldın. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR..."
+        text: "SHADOW İLE İLETİŞİM KURULUYOR...\n\n[SİSTEM] Şifreli kanal oluşturuluyor...\n[DURUM] Kimlik doğrulama yapılıyor...\n[BAŞARILI] Shadow ile bağlantı kuruldu.\n\n[SHADOW] GHOST haklı, 'Arctic Vault 7'ye sızmak için içeriden bir yardıma ihtiyacınız var. Size bir 'backdoor' (arka kapı) erişim anahtarı göndereceğim. Bu anahtar, sunucunun yerel ağına doğrudan erişim sağlayacak.\n\n[GHOST] Anahtar alındı! Şimdi bu anahtarı kullanarak yedek sunucuya sızmalıyız.\n\nKomut: 'inject key' yazarak anahtarı enjekte et"
+    },
+    {
+        text: "ANAHTAR ENJEKTE EDİLİYOR...\n\n[SİSTEM] Yerel ağa sızılıyor...\n[DURUM] Güvenlik duvarı aşılıyor...\n[BAŞARILI] 'Arctic Vault 7'ye doğrudan erişim sağlandı!\n\n[GHOST] Mükemmel! 'Project Chronos' verileri burada. Bu verileri silmeli ve NEXUS CORP'un zaman manipülasyonu hayallerini sonsuza dek bitirmeliyiz.\n\nKomut: 'delete chronos' yazarak Project Chronos verilerini sil"
+    },
+    {
+        text: "PROJECT CHRONOS VERİLERİ SİLİNİYOR...\n\n[SİSTEM] Veritabanı temizleniyor...\n[DURUM] Tüm kopyalar imha ediliyor...\n[BAŞARILI] Project Chronos verileri tamamen silindi! Dünya büyük bir tehlikeden kurtuldu!\n\n[UYARI] NEXUS CORP'un karşı saldırısı başladı! Tüm siber birimleri sana odaklandı! Yeni bir takip sistemi devreye girdi: 'Chimera Protocol'!\n[ACİL] Konumun tespit ediliyor! Çok az vaktimiz var!\n\n[GHOST] Son bir hamle! İz bırakmadan sistemden tamamen çıkmalıyız. En gelişmiş gizlenme protokolünü kullanacağız. Bu aynı zamanda IP adresini de değiştirecek ve izimizi tamamen kaybettirecek.\n\nKomut: 'initiate stealth' yazarak gizlenme protokolünü başlat"
+    },
+    {
+        text: "GİZLENME PROTOKOLÜ BAŞLATILIYOR...\n\n[SİSTEM] Dijital ayak izleri siliniyor...\n[SİSTEM] Bağlantı tünelleri kapatılıyor...\n[BAŞARILI] Tamamen görünmez oldun! Chimera Protokolü devre dışı bırakıldı.\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa ettin ve kendin de güvende kaldın. Dünya sana minnettar. Adın siber dünyanın efsaneleri arasına yazıldı.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir. Siber dünya seni çağırıyor...\n\nSİSTEM KAPATILIYOR..."
+    },
+    {
+        text: "GÖREV TAMAMLANDI. BAŞARI. DÜNYA ARTIK DAHA GÜVENLİ.\n\nTEŞEKKÜRLER, AJAN.\n\nOyun Sonu."
     }
-    // Yeni Hikaye Adımları Sonu
 ];
-
+    
 /**
  * Types out text character by character into a specified HTML element.
  * @param {string} text The text to type.
