@@ -273,358 +273,471 @@
 <audio id="voiceAudio"></audio>
 
 <script>
-   let currentStoryIndex = 0;
-let isDownloading = false;
-let downloadProgress = 0;
-const DOWNLOAD_DURATION = 120000; // 2 minutes (milliseconds)
-const DOWNLOAD_INTERVAL = 100; // Update every 100ms
-const TYPING_SPEED = 60; // Text typing speed (in ms, lower number is faster)
+    let currentStoryIndex = 0;
+    let isDownloading = false;
+    let downloadProgress = 0;
+    const DOWNLOAD_DURATION = 12000; // 12 saniye olarak kısaltıldı (test için)
+    const DOWNLOAD_INTERVAL = 100; // Update every 100ms
+    const TYPING_SPEED = 60; // Text typing speed (in ms, lower number is faster)
 
-// Audio elements
-const backgroundMusic = document.getElementById('backgroundMusic');
-// voiceAudio kaldırıldı
+    // Audio elements
+    const backgroundMusic = document.getElementById('backgroundMusic');
 
-// Matrix effect setup
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const characters = '01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ'; // Japanese Katakana and numbers
-const fontSize = 14;
-const columns = canvas.width / fontSize;
-const drops = [];
-
-// Initialize drops for Matrix effect
-for (let i = 0; i < columns; i++) {
-    drops[i] = 1;
-}
-
-/**
- * Draws the Matrix rain effect on the canvas.
- */
-function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#00ff00';
-    ctx.font = fontSize + 'px courier new';
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = characters.charAt(Math.floor(Math.random() * characters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        // Send drop back to the top when it goes off screen
-        if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-        }
-        drops[i]++;
-    }
-}
-
-// Set interval for Matrix effect animation
-setInterval(drawMatrix, 35);
-
-// playVoiceAudio fonksiyonu kaldırıldı.
-
-/**
- * Plays or pauses the background music.
- * @param {boolean} play True to play, false to pause.
- */
-function toggleBackgroundMusic(play) {
-    if (play) {
-        backgroundMusic.volume = 0.3; // Lower volume for background music
-        backgroundMusic.play().catch(e => {
-            console.warn("Background music auto-play prevented. User interaction might be needed.", e);
-        });
-    } else {
-        backgroundMusic.pause();
-    }
-}
-
-// Initial load and menu display
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('mainMenu').style.display = 'block';
-        // Attempt to start background music after first user interaction (e.g., loading screen completes)
-        toggleBackgroundMusic(true);
-    }, 3000);
-});
-
-/**
- * Starts the game, hides main menu, shows game screen, and starts the story.
- */
-function startGame() {
-    document.getElementById('mainMenu').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'block';
-    toggleBackgroundMusic(true); // Continue playing music during game
-    startStory();
-}
-
-/**
- * Shows the developer screen.
- */
-function showDeveloper() {
-    document.getElementById('mainMenu').style.display = 'none';
-    document.getElementById('developerScreen').style.display = 'block';
-    toggleBackgroundMusic(true); // Play music on developer screen too
-}
-
-/**
- * Navigates back to the main menu and resets game state.
- */
-function goBack() {
-    document.getElementById('gameScreen').style.display = 'none';
-    document.getElementById('developerScreen').style.display = 'none';
-    document.getElementById('mainMenu').style.display = 'block';
-    currentStoryIndex = 0;
-    document.getElementById('inputArea').style.display = 'none';
-    document.getElementById('missionStatus').style.display = 'none';
-    document.getElementById('downloadStatus').style.display = 'none'; // Reset download status
-    isDownloading = false;
-    downloadProgress = 0;
-    document.getElementById('progressFill').style.width = '0%';
-    toggleBackgroundMusic(true); // Continue music on main menu
-}
-
-// Story data with text (audio properties removed as requested)
-const storyTexts = [
- const storyTexts = [
-    {
-        text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)"
-    },
-    {
-        text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]"
-    },
-    {
-        text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele"
-    },
-    {
-        text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz"
-    },
-    {
-        text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir"
-    },
-    {
-        text: "VERİLER İNDİRİLİYOR...\nLütfen bekle. Bu işlem biraz zaman alabilir.\n"
-    },
-    {
-        text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et"
-    },
-    {
-        text: "VERİ ANALİZİ TAMAMLANDI!\n\n[BİLGİ] İndirilen veriler şifreli. Şifreleme algoritması: 'Quantum-X'.\n[GHOST] Bu şifrelemeyi kırmak için özel bir algoritma çalıştırmamız gerekiyor. Normal yöntemlerle çok uzun sürer. Sistemin derinliklerinde gizlenmiş bir anahtar buldum: 'Project Chimera'nın eski bir test protokolü.\n\nKomut: 'decrypt data' yazarak şifre çözme işlemini başlat"
-    },
-    {
-        text: "ŞİFRE ÇÖZME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Kuantum şifre çözücü aktif edildi...\n[DURUM] Veri blokları işleniyor...\n[BAŞARILI] Şifre çözme tamamlandı! Gizli veriler artık okunabilir durumda.\n\n[GHOST] Harika iş! Şimdi bu veriler bize NEXUS CORP'un ana sunucusuna erişim için zayıf bir nokta gösteriyor: Kripto-finans birimlerinin kullandığı eski bir açık. Ayrıca, 'Project Chronos' adında zaman manipülasyonu üzerine çalıştıklarını da öğrendik! Bu çok daha tehlikeli!\n\nKomut: 'takeover server' yazarak ana sunucuyu ele geçir"
-    },
-    {
-        text: "ANA SUNUCU ELE GEÇİRİLİYOR...\n\n[SİSTEM] Güvenlik protokolleri bypass ediliyor...\n[DURUM] Yönetici ayrıcalıkları elde ediliyor...\n[BAŞARILI] NEXUS CORP'un ana sunucusu ele geçirildi!\n\n[GHOST] Artık tüm kontrol bizde! Ancak, 'Project Chronos' verileri ayrı bir yedek sunucuda tutuluyor. Onu da ele geçirmeliyiz ki, bu korkunç teknoloji asla kullanılamasın.\n\nKomut: 'locate backup' yazarak yedek sunucuyu bul"
-    },
-    {
-        text: "YEDEK SUNUCU TESPİT EDİLİYOR...\n\n[SİSTEM] Ağ topolojisi taranıyor...\n[DURUM] Gizli bağlantılar analiz ediliyor...\n[BAŞARILI] Yedek sunucu konumu tespit edildi: 'Arctic Vault 7'. Çok iyi korunuyor.\n\n[GHOST] Buraya uzaktan erişim sağlamamız imkansız. Fiziksel bir sızma yapmalıyız. Neyse ki, NEXUS CORP'un eski bir çalışanı olan 'Shadow' ile temas kurdum. Bize içeriden yardım edebilir.\n\nKomut: 'contact shadow' yazarak Shadow ile iletişime geç"
-    },
-    {
-        text: "SHADOW İLE İLETİŞİM KURULUYOR...\n\n[SİSTEM] Şifreli kanal oluşturuluyor...\n[DURUM] Kimlik doğrulama yapılıyor...\n[BAŞARILI] Shadow ile bağlantı kuruldu.\n\n[SHADOW] GHOST haklı, 'Arctic Vault 7'ye sızmak için içeriden bir yardıma ihtiyacınız var. Size bir 'backdoor' (arka kapı) erişim anahtarı göndereceğim. Bu anahtar, sunucunun yerel ağına doğrudan erişim sağlayacak.\n\n[GHOST] Anahtar alındı! Şimdi bu anahtarı kullanarak yedek sunucuya sızmalıyız.\n\nKomut: 'inject key' yazarak anahtarı enjekte et"
-    },
-    {
-        text: "ANAHTAR ENJEKTE EDİLİYOR...\n\n[SİSTEM] Yerel ağa sızılıyor...\n[DURUM] Güvenlik duvarı aşılıyor...\n[BAŞARILI] 'Arctic Vault 7'ye doğrudan erişim sağlandı!\n\n[GHOST] Mükemmel! 'Project Chronos' verileri burada. Bu verileri silmeli ve NEXUS CORP'un zaman manipülasyonu hayallerini sonsuza dek bitirmeliyiz.\n\nKomut: 'delete chronos' yazarak Project Chronos verilerini sil"
-    },
-    {
-        text: "PROJECT CHRONOS VERİLERİ SİLİNİYOR...\n\n[SİSTEM] Veritabanı temizleniyor...\n[DURUM] Tüm kopyalar imha ediliyor...\n[BAŞARILI] Project Chronos verileri tamamen silindi! Dünya büyük bir tehlikeden kurtuldu!\n\n[UYARI] NEXUS CORP'un karşı saldırısı başladı! Tüm siber birimleri sana odaklandı! Yeni bir takip sistemi devreye girdi: 'Chimera Protocol'!\n[ACİL] Konumun tespit ediliyor! Çok az vaktimiz var!\n\n[GHOST] Son bir hamle! İz bırakmadan sistemden tamamen çıkmalıyız. En gelişmiş gizlenme protokolünü kullanacağız. Bu aynı zamanda IP adresini de değiştirecek ve izimizi tamamen kaybettirecek.\n\nKomut: 'initiate stealth' yazarak gizlenme protokolünü başlat"
-    },
-    {
-        text: "GİZLENME PROTOKOLÜ BAŞLATILIYOR...\n\n[SİSTEM] Dijital ayak izleri siliniyor...\n[SİSTEM] Bağlantı tünelleri kapatılıyor...\n[BAŞARILI] Tamamen görünmez oldun! Chimera Protokolü devre dışı bırakıldı.\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa ettin ve kendin de güvende kaldın. Dünya sana minnettar. Adın siber dünyanın efsaneleri arasına yazıldı.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir. Siber dünya seni çağırıyor...\n\nSİSTEM KAPATILIYOR..."
-    },
-    {
-        text: "GÖREV TAMAMLANDI. BAŞARI. DÜNYA ARTIK DAHA GÜVENLİ.\n\nTEŞEKKÜRLER, AJAN.\n\nOyun Sonu."
-    }
-];
-    
-/**
- * Types out text character by character into a specified HTML element.
- * @param {string} text The text to type.
- * @param {string} elementId The ID of the HTML element where the text will be displayed.
- * @param {function} [callback] An optional callback function to execute after typing is complete.
- */
-async function typeText(text, elementId, callback) {
-    const element = document.getElementById(elementId);
-    element.innerHTML = ''; // Clear existing text
-    let i = 0;
-
-    function typeChar() {
-        if (i < text.length) {
-            if (text[i] === '\n') {
-                element.innerHTML += '<br>'; // Handle newlines
-            } else {
-                element.innerHTML += text[i];
-            }
-            i++;
-            setTimeout(typeChar, TYPING_SPEED + Math.random() * 20); // Add slight randomness for natural typing
-        } else {
-            // Remove existing cursor and add a new one if input area is visible
-            const existingCursor = element.querySelector('.cursor');
-            if (existingCursor) existingCursor.remove();
-            if (elementId === 'storyText' && document.getElementById('inputArea').style.display === 'flex') {
-                document.getElementById('commandInput').focus();
-            } else {
-                element.innerHTML += '<span class="cursor">_</span>'; // Add blinking cursor
-            }
-            if (callback) callback();
-        }
-    }
-    typeChar();
-}
-
-/**
- * Advances the story based on the current `currentStoryIndex`.
- * Handles displaying text, playing audio, and managing UI elements (input, download status).
- */
-async function startStory() {
-    if (currentStoryIndex < storyTexts.length) {
-        const story = storyTexts[currentStoryIndex];
-
-        // Ses çalma kısmı kaldırıldı. Artık sadece metinler işlenecek.
-
-        if (currentStoryIndex === 5) { // "download all" komutundan sonraki indeks
-            isDownloading = true;
-            document.getElementById('inputArea').style.display = 'none';
-            document.getElementById('downloadStatus').style.display = 'block';
-            document.getElementById('downloadText').innerText = story.text;
-            startDownloadSimulation();
-        } else if (currentStoryIndex === storyTexts.length - 1) { // Son kapanış aşaması (otomatik ilerlemeli)
-            typeText(story.text, 'storyText', () => {
-                document.getElementById('inputArea').style.display = 'none'; // Giriş alanını gizle
-                setTimeout(() => {
-                    currentStoryIndex++;
-                    if (currentStoryIndex < storyTexts.length) {
-                        startStory();
-                    } else {
-                        alert('Tebrikler! Başarıyla tüm görevleri tamamladın ve dünyayı büyük bir tehlikeden korudun!');
-                        goBack(); // Görevler bitince ana menüye dön
-                    }
-                }, 2500); // Sonraki hikaye segmentinden önce kısa bir duraklama
-            });
-        } else { // Diğer tüm komut bekleyen aşamalar ve başlangıç aşaması (index 0)
-            typeText(story.text, 'storyText', () => {
-                document.getElementById('inputArea').style.display = 'flex'; // Giriş alanını göster
-                document.getElementById('commandInput').focus(); // İmleci giriş alanına odakla
-            });
-        }
-    }
-}
-
-/**
- * Simulates a file download with a progress bar.
- */
-function startDownloadSimulation() {
-    let startTime = Date.now();
-    let interval = setInterval(() => {
-        let elapsedTime = Date.now() - startTime;
-        downloadProgress = (elapsedTime / DOWNLOAD_DURATION) * 100;
-
-        document.getElementById('progressFill').style.width = `${downloadProgress}%`;
-        document.getElementById('downloadText').innerText = `VERİLER İNDİRİLİYOR...\nLütfen bekle. İlerleme: %${Math.floor(downloadProgress)}`;
-
-        if (downloadProgress >= 100) {
-            clearInterval(interval);
-            isDownloading = false;
-            document.getElementById('downloadStatus').style.display = 'none';
-            document.getElementById('missionStatus').style.display = 'block';
-            document.getElementById('missionStatus').innerHTML = '<span class="success">✅ İNDİRME TAMAMLANDI!</span>';
-            setTimeout(() => {
-                currentStoryIndex++;
-                startStory();
-                document.getElementById('missionStatus').style.display = 'none';
-            }, 1500);
-        }
-    }, DOWNLOAD_INTERVAL);
-}
-
-/**
- * Handles user commands entered in the input field.
- * @param {KeyboardEvent} event The keyboard event object.
- */
-function handleCommand(event) {
-    if (event.key === 'Enter' && !isDownloading) {
-        const command = event.target.value.toLowerCase().trim();
-        const missionStatus = document.getElementById('missionStatus');
-        event.target.value = ''; // Clear input field
-
-        let commandHandled = false;
-
-        // Command handling logic based on current story index
-        if (currentStoryIndex === 0 && command === '') { // For the first "Press Enter" prompt
-            commandHandled = true;
-        } else if (currentStoryIndex === 1 && command.includes('port')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ PORT SALDIRISI BAŞARILI!</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 2 && command === 'ls') {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ DOSYA LİSTESİ ALINDI!</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 3 && command.includes('open')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="warning">⚠️ GİZLİ DOSYALAR ERİŞİLDİ!</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 4 && command.includes('download all')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ İNDİRME BAŞLATILIYOR...</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 6 && command.includes('analyze data')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ VERİ ANALİZİ BAŞLADI!</span>';
-            commandHandled = true;
-        }
-        // Yeni komutlar için eklemeler
-        else if (currentStoryIndex === 7 && command.includes('decrypt data')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ ŞİFRE ÇÖZME BAŞLATILIYOR...</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 8 && command.includes('takeover server')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ SUNUCU ELE GEÇİRİLİYOR...</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 9 && command.includes('leak data')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ VERİLER SIZDIRILIYOR...</span>';
-            commandHandled = true;
-        } else if (currentStoryIndex === 10 && command.includes('initiate stealth')) {
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="success">✅ GİZLENME PROTOKOLÜ AKTİF!</span>';
-            commandHandled = true;
-        }
-        // Mevcut son komutun index'i değiştiği için burayı da güncelledik.
-        else if (currentStoryIndex === storyTexts.length - 1 && command === '') { // Son aşama için boş Enter
-            commandHandled = true;
-        }
-        else {
-            // Invalid command feedback
-            missionStatus.style.display = 'block';
-            missionStatus.innerHTML = '<span class="error">❌ GEÇERSİZ KOMUT! Tekrar dene.</span>';
-            setTimeout(() => {
-                missionStatus.style.display = 'none';
-            }, 2000);
-            commandHandled = false;
-        }
-
-        // Advance story if command was successfully handled
-        if (commandHandled) {
-            document.getElementById('inputArea').style.display = 'none'; // Hide input
-            setTimeout(() => {
-                currentStoryIndex++;
-                startStory();
-                missionStatus.style.display = 'none'; // Clear mission status
-            }, 1500); // Short delay before next story segment
-        }
-    }
-}
-
-// Update canvas size on window resize
-window.addEventListener('resize', () => {
+    // Matrix effect setup
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-});
+
+    const characters = '01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ'; // Japanese Katakana and numbers
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    // Initialize drops for Matrix effect
+    for (let i = 0; i < columns; i++) {
+        drops[i] = 1;
+    }
+
+    /**
+     * Draws the Matrix rain effect on the canvas.
+     */
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ff00';
+        ctx.font = fontSize + 'px courier new';
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = characters.charAt(Math.floor(Math.random() * characters.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            // Send drop back to the top when it goes off screen
+            if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+
+    // Set interval for Matrix effect animation
+    setInterval(drawMatrix, 35);
+
+    /**
+     * Plays or pauses the background music.
+     * @param {boolean} play True to play, false to pause.
+     */
+    function toggleBackgroundMusic(play) {
+        if (play) {
+            backgroundMusic.volume = 0.3; // Lower volume for background music
+            backgroundMusic.play().catch(e => {
+                console.warn("Background music auto-play prevented. User interaction might be needed.", e);
+            });
+        } else {
+            backgroundMusic.pause();
+        }
+    }
+
+    // Initial load and menu display
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+            // Attempt to start background music after first user interaction (e.g., loading screen completes)
+            toggleBackgroundMusic(true);
+        }, 3000);
+    });
+
+    /**
+     * Starts the game, hides main menu, shows game screen, and starts the story.
+     */
+    function startGame() {
+        document.getElementById('mainMenu').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        toggleBackgroundMusic(true); // Continue playing music during game
+        startStory();
+    }
+
+    /**
+     * Shows the developer screen.
+     */
+    function showDeveloper() {
+        document.getElementById('mainMenu').style.display = 'none';
+        document.getElementById('developerScreen').style.display = 'block';
+        toggleBackgroundMusic(true); // Play music on developer screen too
+    }
+
+    /**
+     * Navigates back to the main menu and resets game state.
+     */
+    function goBack() {
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('developerScreen').style.display = 'none';
+        document.getElementById('mainMenu').style.display = 'block';
+        currentStoryIndex = 0;
+        document.getElementById('inputArea').style.display = 'none';
+        document.getElementById('missionStatus').style.display = 'none';
+        document.getElementById('downloadStatus').style.display = 'none'; // Reset download status
+        isDownloading = false;
+        downloadProgress = 0;
+        document.getElementById('progressFill').style.width = '0%';
+        toggleBackgroundMusic(true); // Continue music on main menu
+    }
+
+    // Story data with text (audio properties removed as requested)
+    const storyTexts = [
+        {
+            text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)"
+        },
+        {
+            text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]"
+        },
+        {
+            text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele"
+        },
+        {
+            text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz"
+        },
+        {
+            text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir"
+        },
+        {
+            text: "VERİLER İNDİRİLİYOR...\nLütfen bekle. Bu işlem biraz zaman alabilir.\n"
+        },
+        {
+            text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et"
+        },
+        {
+            text: "VERİ ANALİZİ TAMAMLANDI!\n\n[BİLGİ] İndirilen veriler şifreli. Şifreleme algoritması: 'Quantum-X'.\n[GHOST] Bu şifrelemeyi kırmak için özel bir algoritma çalıştırmamız gerekiyor. Normal yöntemlerle çok uzun sürer. Sistemin derinliklerinde gizlenmiş bir anahtar buldum: 'Project Chimera'nın eski bir test protokolü.\n\nKomut: 'decrypt data' yazarak şifre çözme işlemini başlat"
+        },
+        {
+            text: "ŞİFRE ÇÖZME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Kuantum şifre çözücü aktif edildi...\n[DURUM] Veri blokları işleniyor...\n[BAŞARILI] Şifre çözme tamamlandı! Gizli veriler artık okunabilir durumda.\n\n[GHOST] Harika iş! Şimdi bu veriler bize NEXUS CORP'un ana sunucusuna erişim için zayıf bir nokta gösteriyor: Kripto-finans birimlerinin kullandığı eski bir açık. Ayrıca, 'Project Chronos' adında zaman manipülasyonu üzerine çalıştıklarını da öğrendik! Bu çok daha tehlikeli!\n\nKomut: 'takeover server' yazarak ana sunucuyu ele geçir"
+        },
+        {
+            text: "ANA SUNUCU ELE GEÇİRİLİYOR...\n\n[SİSTEM] Güvenlik protokolleri bypass ediliyor...\n[DURUM] Yönetici ayrıcalıkları elde ediliyor...\n[BAŞARILI] NEXUS CORP'un ana sunucusu ele geçirildi!\n\n[GHOST] Artık tüm kontrol bizde! Ancak, 'Project Chronos' verileri ayrı bir yedek sunucuda tutuluyor. Onu da ele geçirmeliyiz ki, bu korkunç teknoloji asla kullanılamasın.\n\nKomut: 'locate backup' yazarak yedek sunucuyu bul"
+        },
+        {
+            text: "YEDEK SUNUCU TESPİT EDİLİYOR...\n\n[SİSTEM] Ağ topolojisi taranıyor...\n[DURUM] Gizli bağlantılar analiz ediliyor...\n[BAŞARILI] Yedek sunucu konumu tespit edildi: 'Arctic Vault 7'. Çok iyi korunuyor.\n\n[GHOST] Buraya uzaktan erişim sağlamamız imkansız. Fiziksel bir sızma yapmalıyız. Neyse ki, NEXUS CORP'un eski bir çalışanı olan 'Shadow' ile temas kurdum. Bize içeriden yardım edebilir.\n\nKomut: 'contact shadow' yazarak Shadow ile iletişime geç"
+        },
+        {
+            text: "SHADOW İLE İLETİŞİM KURULUYOR...\n\n[SİSTEM] Şifreli kanal oluşturuluyor...\n[DURUM] Kimlik doğrulama yapılıyor...\n[BAŞARILI] Shadow ile bağlantı kuruldu.\n\n[SHADOW] GHOST haklı, 'Arctic Vault 7'ye sızmak için içeriden bir yardıma ihtiyacınız var. Size bir 'backdoor' (arka kapı) erişim anahtarı göndereceğim. Bu anahtar, sunucunun yerel ağına doğrudan erişim sağlayacak.\n\n[GHOST] Anahtar alındı! Şimdi bu anahtarı kullanarak yedek sunucuya sızmalıyız.\n\nKomut: 'inject key' yazarak anahtarı enjekte et"
+        },
+        {
+            text: "ANAHTAR ENJEKTE EDİLİYOR...\n\n[SİSTEM] Yerel ağa sızılıyor...\n[DURUM] Güvenlik duvarı aşılıyor...\n[BAŞARILI] 'Arctic Vault 7'ye doğrudan erişim sağlandı!\n\n[GHOST] Mükemmel! 'Project Chronos' verileri burada. Bu verileri silmeli ve NEXUS CORP'un zaman manipülasyonu hayallerini sonsuza dek bitirmeliyiz.\n\nKomut: 'delete chronos' yazarak Project Chronos verilerini sil"
+        },
+        {
+            text: "PROJECT CHRONOS VERİLERİ SİLİNİYOR...\n\n[SİSTEM] Veritabanı temizleniyor...\n[DURUM] Tüm kopyalar imha ediliyor...\n[BAŞARILI] Project Chronos verileri tamamen silindi! Dünya büyük bir tehlikeden kurtuldu!\n\n[UYARI] NEXUS CORP'un karşı saldırısı başladı! Tüm siber birimleri sana odaklandı! Yeni bir takip sistemi devreye girdi: 'Chimera Protocol'!\n[ACİL] Konumun tespit ediliyor! Çok az vaktimiz var!\n\n[GHOST] Son bir hamle! İz bırakmadan sistemden tamamen çıkmalıyız. En gelişmiş gizlenme protokolünü kullanacağız. Bu aynı zamanda IP adresini de değiştirecek ve izimizi tamamen kaybettirecek.\n\nKomut: 'initiate stealth' yazarak gizlenme protokolünü başlat"
+        },
+        {
+            text: "GİZLENME PROTOKOLÜ BAŞLATILIYOR...\n\n[SİSTEM] Dijital ayak izleri siliniyor...\n[SİSTEM] Bağlantı tünelleri kapatılıyor...\n[BAŞARILI] Tamamen görünmez oldun! Chimera Protokolü devre dışı bırakıldı.\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa ettin ve kendin de güvende kaldın. Dünya sana minnettar. Adın siber dünyanın efsaneleri arasına yazıldı.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir. Siber dünya seni çağırıyor...\n\nSİSTEM KAPATILIYOR..."
+        },
+        {
+            text: "GÖREV TAMAMLANDI. BAŞARI. DÜNYA ARTIK DAHA GÜVENLİ.\n\nTEŞEKKÜRLER, AJAN.\n\nOyun Sonu."
+        }
+    ];
+
+    /**
+     * Types out text character by character into a specified HTML element.
+     * @param {string} text The text to type.
+     * @param {string} elementId The ID of the HTML element where the text will be displayed.
+     * @param {function} [callback] An optional callback function to execute after typing is complete.
+     */
+    async function typeText(text, elementId, callback) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = ''; // Clear existing text
+        let i = 0;
+
+        function typeChar() {
+            if (i < text.length) {
+                if (text[i] === '\n') {
+                    element.innerHTML += '<br>'; // Handle newlines
+                } else {
+                    element.innerHTML += text[i];
+                }
+                i++;
+                setTimeout(typeChar, TYPING_SPEED + Math.random() * 20); // Add slight randomness for natural typing
+            } else {
+                // Remove existing cursor and add a new one if input area is visible
+                const existingCursor = element.querySelector('.cursor');
+                if (existingCursor) existingCursor.remove();
+                if (elementId === 'storyText' && document.getElementById('inputArea').style.display === 'flex') {
+                    document.getElementById('commandInput').focus();
+                } else {
+                    element.innerHTML += '<span class="cursor">_</span>'; // Add blinking cursor
+                }
+                if (callback) callback();
+            }
+        }
+        typeChar();
+    }
+
+    /**
+     * Advances the story based on the current `currentStoryIndex`.
+     * Handles displaying text, playing audio, and managing UI elements (input, download status).
+     */
+    async function startStory() {
+        if (currentStoryIndex < storyTexts.length) {
+            const story = storyTexts[currentStoryIndex];
+
+            if (currentStoryIndex === 5) { // "download all" komutundan sonraki indeks
+                isDownloading = true;
+                document.getElementById('inputArea').style.display = 'none';
+                document.getElementById('downloadStatus').style.display = 'block';
+                document.getElementById('downloadText').innerText = story.text;
+                startDownloadSimulation();
+            } else if (currentStoryIndex === storyTexts.length - 1) { // Son kapanış aşaması (otomatik ilerlemeli)
+                typeText(story.text, 'storyText', () => {
+                    document.getElementById('inputArea').style.display = 'none'; // Giriş alanını gizle
+                    // Son hikaye metnini gösterdikten sonra oyunun bitişini handle et
+                    // alert('Tebrikler! Başarıyla tüm görevleri tamamladın ve dünyayı büyük bir tehlikeden korudun!');
+                    // goBack(); // Görevler bitince ana menüye dön
+                    // Son ekranı bekletmek için ek süre
+                });
+            }
+            else { // Diğer tüm komut bekleyen aşamalar ve başlangıç aşaması (index 0)
+                typeText(story.text, 'storyText', () => {
+                    // Eğer son ekran değilse, input alanını göster
+                    if (currentStoryIndex < storyTexts.length - 1) {
+                         document.getElementById('inputArea').style.display = 'flex'; // Giriş alanını göster
+                         document.getElementById('commandInput').focus(); // İmleci giriş alanına odakla
+                    } else {
+                        // Oyun sonu, input alanı gizli kalmalı
+                        document.getElementById('inputArea').style.display = 'none';
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Simulates a file download with a progress bar.
+     */
+    function startDownloadSimulation() {
+        let startTime = Date.now();
+        let interval = setInterval(() => {
+            let elapsedTime = Date.now() - startTime;
+            downloadProgress = (elapsedTime / DOWNLOAD_DURATION) * 100;
+
+            document.getElementById('progressFill').style.width = `${downloadProgress}%`;
+            document.getElementById('downloadText').innerText = `VERİLER İNDİRİLİYOR...\nLütfen bekle. İlerleme: %${Math.floor(downloadProgress)}`;
+
+            if (downloadProgress >= 100) {
+                clearInterval(interval);
+                isDownloading = false;
+                document.getElementById('downloadStatus').style.display = 'none';
+                document.getElementById('missionStatus').style.display = 'block';
+                document.getElementById('missionStatus').innerHTML = '<span class="success">✅ İNDİRME TAMAMLANDI!</span>';
+                setTimeout(() => {
+                    currentStoryIndex++;
+                    startStory();
+                    document.getElementById('missionStatus').style.display = 'none';
+                }, 1500);
+            }
+        }, DOWNLOAD_INTERVAL);
+    }
+
+    /**
+     * Handles user commands entered in the input field.
+     * @param {KeyboardEvent} event The keyboard event object.
+     */
+    function handleCommand(event) {
+        if (event.key === 'Enter' && !isDownloading) {
+            const command = event.target.value.toLowerCase().trim();
+            const missionStatus = document.getElementById('missionStatus');
+            event.target.value = ''; // Clear input field
+
+            let commandHandled = false;
+
+            // Command handling logic based on current story index
+            switch (currentStoryIndex) {
+                case 0: // İlk ekran: ENTER'a basılmalı
+                    if (command === '') {
+                        commandHandled = true;
+                    } else {
+                        displayError("ENTER tuşuna basın.");
+                    }
+                    break;
+                case 1: // Port seçimi: "port [numara]"
+                    if (command.startsWith('port ')) {
+                        const portNumber = command.substring(5); // "port " kısmını atla
+                        if (portNumber === '22') {
+                            displaySuccess("✅ PORT SALDIRISI BAŞARILI!");
+                            commandHandled = true;
+                        } else {
+                            displayError("Geçersiz port numarası. Sadece 'port 22' geçerli.");
+                        }
+                    } else {
+                        displayError("Lütfen 'port [numara]' şeklinde komut girin.");
+                    }
+                    break;
+                case 2: // Dosyaları listele: "ls"
+                    if (command === 'ls') {
+                        displaySuccess("✅ DOSYA LİSTESİ ALINDI!");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'ls' yazın.");
+                    }
+                    break;
+                case 3: // Dosya açma: "open [dosya_adı]"
+                    if (command.startsWith('open ')) {
+                        const fileName = command.substring(5);
+                        if (fileName === 'secret_experiments') {
+                             displayWarning("⚠️ GİZLİ DOSYALAR ERİŞİLDİ!");
+                             commandHandled = true;
+                        } else {
+                            displayError("Geçersiz dosya adı. 'open secret_experiments' yazın.");
+                        }
+                    } else {
+                        displayError("Lütfen 'open [dosya_adı]' şeklinde komut girin.");
+                    }
+                    break;
+                case 4: // Veri indirme: "download all"
+                    if (command === 'download all') {
+                        displaySuccess("✅ İNDİRME BAŞLATILIYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'download all' yazın.");
+                    }
+                    break;
+                case 6: // Veri analizi: "analyze data"
+                    if (command === 'analyze data') {
+                        displaySuccess("✅ VERİ ANALİZİ BAŞLADI!");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'analyze data' yazın.");
+                    }
+                    break;
+                case 7: // Şifre çözme: "decrypt data"
+                    if (command === 'decrypt data') {
+                        displaySuccess("✅ ŞİFRE ÇÖZME BAŞLATILIYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'decrypt data' yazın.");
+                    }
+                    break;
+                case 8: // Ana sunucuyu ele geçirme: "takeover server"
+                    if (command === 'takeover server') {
+                        displaySuccess("✅ SUNUCU ELE GEÇİRİLİYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'takeover server' yazın.");
+                    }
+                    break;
+                case 9: // Yedek sunucuyu bulma: "locate backup"
+                    if (command === 'locate backup') {
+                        displaySuccess("✅ YEDEK SUNUCU TESPİT EDİLİYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'locate backup' yazın.");
+                    }
+                    break;
+                case 10: // Shadow ile iletişim: "contact shadow"
+                    if (command === 'contact shadow') {
+                        displaySuccess("✅ SHADOW İLE İLETİŞİM KURULUYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'contact shadow' yazın.");
+                    }
+                    break;
+                case 11: // Anahtar enjekte etme: "inject key"
+                    if (command === 'inject key') {
+                        displaySuccess("✅ ANAHTAR ENJEKTE EDİLİYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'inject key' yazın.");
+                    }
+                    break;
+                case 12: // Project Chronos verilerini silme: "delete chronos"
+                    if (command === 'delete chronos') {
+                        displaySuccess("✅ PROJECT CHRONOS VERİLERİ SİLİNİYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'delete chronos' yazın.");
+                    }
+                    break;
+                case 13: // Gizlenme protokolünü başlatma: "initiate stealth"
+                    if (command === 'initiate stealth') {
+                        displaySuccess("✅ GİZLENME PROTOKOLÜ BAŞLATILIYOR...");
+                        commandHandled = true;
+                    } else {
+                        displayError("Geçersiz komut. Lütfen 'initiate stealth' yazın.");
+                    }
+                    break;
+                case 14: // Son ekran, otomatik ilerleyecek
+                    commandHandled = true; // Boş ENTER kabul etsin
+                    break;
+                case 15: // Oyun sonu ekranı
+                    // Buraya ek bir işlem gerekmez, oyun zaten tamamlandı.
+                    commandHandled = true; // Boş ENTER kabul etsin
+                    break;
+                default:
+                    // Beklenmeyen bir durumda veya geçersiz komutta hata ver
+                    displayError("❌ GEÇERSİZ KOMUT! Tekrar dene.");
+                    break;
+            }
+
+            // Advance story if command was successfully handled
+            if (commandHandled) {
+                document.getElementById('inputArea').style.display = 'none'; // Hide input
+                setTimeout(() => {
+                    // Eğer son index'te değilsek veya son index'te ama "Oyun Sonu" ekranındaysak ilerle
+                    if (currentStoryIndex < storyTexts.length -1 ) {
+                        currentStoryIndex++;
+                        startStory();
+                    } else if (currentStoryIndex === storyTexts.length -1) {
+                         // Oyun sonu ekranında kal, input alanı kapalı kalsın
+                         document.getElementById('inputArea').style.display = 'none';
+                    }
+                    missionStatus.style.display = 'none'; // Clear mission status
+                }, 1500); // Short delay before next story segment
+            }
+        }
+    }
+
+    /**
+     * Displays a success message in the mission status area.
+     * @param {string} message The success message to display.
+     */
+    function displaySuccess(message) {
+        const missionStatus = document.getElementById('missionStatus');
+        missionStatus.style.display = 'block';
+        missionStatus.innerHTML = `<span class="success">${message}</span>`;
+        setTimeout(() => {
+            missionStatus.style.display = 'none';
+        }, 1500); // 1.5 saniye sonra mesajı gizle
+    }
+
+    /**
+     * Displays a warning message in the mission status area.
+     * @param {string} message The warning message to display.
+     */
+    function displayWarning(message) {
+        const missionStatus = document.getElementById('missionStatus');
+        missionStatus.style.display = 'block';
+        missionStatus.innerHTML = `<span class="warning">${message}</span>`;
+        setTimeout(() => {
+            missionStatus.style.display = 'none';
+        }, 1500); // 1.5 saniye sonra mesajı gizle
+    }
+
+    /**
+     * Displays an error message in the mission status area.
+     * @param {string} message The error message to display.
+     */
+    function displayError(message) {
+        const missionStatus = document.getElementById('missionStatus');
+        missionStatus.style.display = 'block';
+        missionStatus.innerHTML = `<span class="error">${message}</span>`;
+        setTimeout(() => {
+            missionStatus.style.display = 'none';
+        }, 2000); // 2 saniye sonra mesajı gizle
+    }
+
+    // Update canvas size on window resize
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 </script>
 </body>
 </html>
