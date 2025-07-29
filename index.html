@@ -1,0 +1,463 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Simülatörü</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .loader {
+            font-size: 8rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .main-menu {
+            display: none;
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .welcome {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            font-size: 2rem;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .menu-options {
+            font-size: 1.5rem;
+            margin-top: 100px;
+        }
+
+        .menu-item {
+            margin: 20px 0;
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            border: 2px solid #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .game-screen {
+            display: none;
+            padding: 20px;
+            width: 100%;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .terminal {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 80vh;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .story-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            white-space: pre-wrap; /* To preserve newlines from \n */
+        }
+
+        .input-area {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: #ff0000;
+            margin-right: 10px;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            outline: none;
+            flex: 1;
+            caret-color: #00ff00;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            transition: all 0.3s;
+            z-index: 10; /* Ensure it's above other elements */
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 0, 0, 0.1);
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .developer-screen {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .dev-info {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .mission-status {
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .success {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .warning {
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        .error {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+
+    <div class="container">
+        <div class="loader" id="loader">/</div>
+
+        <div class="main-menu" id="mainMenu">
+            <div class="welcome">Hoş Geldiniz!</div>
+            <div class="menu-options">
+                <div class="menu-item" onclick="startGame()">1) Oyuna Başla</div>
+                <div class="menu-item" onclick="showDeveloper()">2) Geliştirici</div>
+            </div>
+        </div>
+
+        <div class="game-screen" id="gameScreen">
+            <button class="back-btn" onclick="goBack()">← Geri</button>
+            <div class="terminal">
+                <div class="story-text" id="storyText"></div>
+                <div class="input-area" id="inputArea" style="display: none;">
+                    <span class="prompt">root@matrix:~$</span>
+                    <input type="text" id="commandInput" onkeypress="handleCommand(event)" placeholder="Komut girin...">
+                </div>
+                <div class="mission-status" id="missionStatus" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="developer-screen" id="developerScreen">
+            <button class="back-btn" onclick="goBack()">← Geri</button>
+            <div class="dev-info">
+                <div>🔰 Geliştirici Bilgileri 🔰</div>
+                <br>
+                <div style="font-size: 1.5rem;">
+                    <div>👨‍💻 Yekta Demirkol</div>
+                    <br>
+                    <div style="color: #ffff00;">Cybersecurity Specialist</div>
+                    <div style="color: #ff00ff;">Ethical Hacker & Developer</div>
+                    <br>
+                    <div style="font-size: 1rem; color: #00ffff;">
+                        "Güvenliğin sınırlarını keşfetmek için kodluyorum"
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStoryIndex = 0;
+        // let currentMission = 1; // Not used currently, can remove or use for more complex mission tracking
+        // let playerData = { // Not used currently, can remove or use for more complex player tracking
+        //     name: "",
+        //     level: 1,
+        //     experience: 0,
+        //     completedMissions: []
+        // };
+
+        // Matrix efekti
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const characters = '01アカサタナハマヤラワガザダバパイキシチニヒミリギジヂビピウクスツヌフムユルグズヅブプエケセテネヘメレゲゼデベペオコソトノホモヨロゴゾドボポヴッン';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px courier new';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) { // Adjusted condition
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        // Ses çalma fonksiyonu
+        function playAudio(audioName) {
+            // Ses dosyaları için placeholder - gerçek projede bu dosyalar eklenebilir
+            console.log(`Playing audio: ${audioName}.wav`);
+            // Uncomment the following lines when you have your audio files:
+            // const audio = new Audio(`./audio/${audioName}.wav`); // Assuming audio files are in an 'audio' folder
+            // audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        // Başlangıç yüklemesi
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+            playAudio('audio_intro'); // Renamed for clarity
+        }, 3000);
+
+        function startGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            playAudio('audio_start_game'); // Renamed for clarity
+            startStory();
+        }
+
+        function showDeveloper() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('developerScreen').style.display = 'block';
+        }
+
+        function goBack() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('developerScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+            currentStoryIndex = 0; // Reset story when going back to main menu
+            document.getElementById('inputArea').style.display = 'none'; // Hide input area
+            document.getElementById('missionStatus').style.display = 'none'; // Hide status
+        }
+
+        const storyTexts = [
+            {
+                text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)",
+                audio: "audio_story_1"
+            },
+            {
+                text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK  \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
+                audio: "audio_story_2"
+            },
+            {
+                text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele",
+                audio: "audio_story_3"
+            },
+            {
+                text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz",
+                audio: "audio_story_4"
+            },
+            {
+                text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir",
+                audio: "audio_story_5"
+            },
+            {
+                text: "İNDİRME BAŞLADI...\n\n[████████████████████████████████] 100%\n\n✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem administrätörü şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Sistemden çıkmalıyız. Bu operasyon sayesinde dünyayı büyük bir tehlikeden korudun, genç hacker!\n\n(Devam etmek için ENTER'a basın)",
+                audio: "audio_story_6"
+            },
+            {
+                text: "GÖREV TAMAMLANDI!\n\nTebrikler, genç hacker! NEXUS CORP'un karanlık planlarını ortaya çıkardın ve insanlığı büyük bir tehlikeden korudun. GHOST olarak sana minnettarım.\n\nUnutma, gerçek güç bilgi ve onu doğru kullanma yeteneğindedir.\n\nSİSTEM KAPATILIYOR...",
+                audio: "audio_final"
+            }
+        ];
+
+        function typeText(text, elementId, callback) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+            let i = 0;
+
+            function typeChar() {
+                if (i < text.length) {
+                    if (text[i] === '\n') {
+                        element.innerHTML += '<br>';
+                    } else {
+                        element.innerHTML += text[i];
+                    }
+                    i++;
+                    setTimeout(typeChar, 30 + Math.random() * 20);
+                } else {
+                    // Remove existing cursor before adding a new one for smooth blinking
+                    const existingCursor = element.querySelector('.cursor');
+                    if (existingCursor) existingCursor.remove();
+                    element.innerHTML += '<span class="cursor">_</span>';
+                    if (callback) callback();
+                }
+            }
+            typeChar();
+        }
+
+        function startStory() {
+            if (currentStoryIndex < storyTexts.length) {
+                const story = storyTexts[currentStoryIndex];
+                playAudio(story.audio);
+
+                // For the first story item, automatically advance after a delay
+                if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length -1) { // Also for the final "System Shutting Down" message
+                    typeText(story.text, 'storyText', () => {
+                        document.getElementById('inputArea').style.display = 'none'; // Hide input for intro/outro
+                        setTimeout(() => {
+                            currentStoryIndex++;
+                            if (currentStoryIndex < storyTexts.length) {
+                                startStory();
+                            } else {
+                                // End of game
+                                alert('Tebrikler! Başarıyla tüm görevleri tamamladın ve dünyayı büyük bir tehlikeden korudun!');
+                                goBack();
+                            }
+                        }, 2500); // Wait a bit longer for the intro/outro
+                    });
+                } else {
+                    // For interactive story items, show input after typing
+                    typeText(story.text, 'storyText', () => {
+                        document.getElementById('inputArea').style.display = 'flex';
+                        document.getElementById('commandInput').focus();
+                    });
+                }
+            }
+        }
+
+        function handleCommand(event) {
+            if (event.key === 'Enter') {
+                const command = event.target.value.toLowerCase().trim();
+                const missionStatus = document.getElementById('missionStatus');
+                event.target.value = ''; // Clear input immediately
+
+                let commandHandled = false;
+
+                if (currentStoryIndex === 1 && command.includes('port')) {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="success">✅ PORT SALDIRISI BAŞARILI!</span>';
+                    commandHandled = true;
+                }
+                else if (currentStoryIndex === 2 && command === 'ls') {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="success">✅ DOSYA LİSTESİ ALINDI!</span>';
+                    commandHandled = true;
+                }
+                else if (currentStoryIndex === 3 && command.includes('open')) {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="warning">⚠️ GİZLİ DOSYALAR ERİŞİLDİ!</span>';
+                    commandHandled = true;
+                }
+                else if (currentStoryIndex === 4 && command.includes('download')) {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="success">✅ VERİLER İNDİRİLİYOR...</span>';
+                    commandHandled = true;
+                }
+                // Removed the 'create backdoor' command to align with safety guidelines.
+                // The story now concludes after downloading data and escaping.
+                else {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="error">❌ GEÇERSİZ KOMUT! Tekrar dene.</span>';
+                    setTimeout(() => {
+                        missionStatus.style.display = 'none';
+                    }, 2000);
+                    commandHandled = false;
+                }
+
+                if (commandHandled) {
+                    document.getElementById('inputArea').style.display = 'none'; // Hide input after successful command
+                    setTimeout(() => {
+                        currentStoryIndex++;
+                        startStory();
+                        missionStatus.style.display = 'none';
+                    }, 1500);
+                }
+            }
+        }
+
+        // Pencere yeniden boyutlandırıldığında canvas'ı güncelle
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
