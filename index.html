@@ -273,358 +273,363 @@
 <audio id="voiceAudio"></audio>
 
 <script>
-    let currentStoryIndex = 0;
-    let isDownloading = false;
-    let downloadProgress = 0;
-    const DOWNLOAD_DURATION = 120000; // 2 minutes (milliseconds)
-    const DOWNLOAD_INTERVAL = 100; // Update every 100ms
-    const TYPING_SPEED = 60; // Text typing speed (in ms, lower number is faster)
+   let currentStoryIndex = 0;
+let isDownloading = false;
+let downloadProgress = 0;
+const DOWNLOAD_DURATION = 120000; // 2 minutes (milliseconds)
+const DOWNLOAD_INTERVAL = 100; // Update every 100ms
+const TYPING_SPEED = 60; // Text typing speed (in ms, lower number is faster)
 
-    // Audio elements
-    const backgroundMusic = document.getElementById('backgroundMusic');
-    const voiceAudio = document.getElementById('voiceAudio');
+// Audio elements
+const backgroundMusic = document.getElementById('backgroundMusic');
+const voiceAudio = document.getElementById('voiceAudio');
 
-    // Matrix effect setup
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
+// Matrix effect setup
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const characters = '01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ'; // Japanese Katakana and numbers
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+const drops = [];
+
+// Initialize drops for Matrix effect
+for (let i = 0; i < columns; i++) {
+    drops[i] = 1;
+}
+
+/**
+ * Draws the Matrix rain effect on the canvas.
+ */
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = fontSize + 'px courier new';
+
+    for (let i = 0; i < drops.length; i++) {
+        const text = characters.charAt(Math.floor(Math.random() * characters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        // Send drop back to the top when it goes off screen
+        if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+
+// Set interval for Matrix effect animation
+setInterval(drawMatrix, 35);
+
+/**
+ * Plays a voice audio file.
+ * @param {string} filename The name of the audio file to play (e.g., "audio.wav").
+ * @returns {Promise<void>} A Promise that resolves when the audio finishes playing.
+ */
+function playVoiceAudio(filename) {
+    return new Promise((resolve, reject) => {
+        voiceAudio.src = filename;
+        voiceAudio.volume = 0.8; // Adjust volume as needed
+        voiceAudio.onended = () => resolve(); // Resolve Promise when audio ends
+        voiceAudio.onerror = (e) => {
+            console.error(`Error playing ${filename}:`, e);
+            reject(e);
+        };
+        voiceAudio.play().catch(e => {
+            console.warn(`Auto-play prevented for ${filename}. User interaction might be needed.`, e);
+            reject(e); // Reject Promise if playback fails (e.g., autoplay policy)
+        });
+    });
+}
+
+/**
+ * Plays or pauses the background music.
+ * @param {boolean} play True to play, false to pause.
+ */
+function toggleBackgroundMusic(play) {
+    if (play) {
+        backgroundMusic.volume = 0.3; // Lower volume for background music
+        backgroundMusic.play().catch(e => {
+            console.warn("Background music auto-play prevented. User interaction might be needed.", e);
+        });
+    } else {
+        backgroundMusic.pause();
+    }
+}
+
+// Initial load and menu display
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mainMenu').style.display = 'block';
+        // Attempt to start background music after first user interaction (e.g., loading screen completes)
+        toggleBackgroundMusic(true);
+    }, 3000);
+});
+
+/**
+ * Starts the game, hides main menu, shows game screen, and starts the story.
+ */
+function startGame() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+    toggleBackgroundMusic(true); // Continue playing music during game
+    startStory();
+}
+
+/**
+ * Shows the developer screen.
+ */
+function showDeveloper() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('developerScreen').style.display = 'block';
+    toggleBackgroundMusic(true); // Play music on developer screen too
+}
+
+/**
+ * Navigates back to the main menu and resets game state.
+ */
+function goBack() {
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('developerScreen').style.display = 'none';
+    document.getElementById('mainMenu').style.display = 'block';
+    currentStoryIndex = 0;
+    document.getElementById('inputArea').style.display = 'none';
+    document.getElementById('missionStatus').style.display = 'none';
+    document.getElementById('downloadStatus').style.display = 'none'; // Reset download status
+    isDownloading = false;
+    downloadProgress = 0;
+    document.getElementById('progressFill').style.width = '0%';
+    toggleBackgroundMusic(true); // Continue music on main menu
+}
+
+// Story data with text and associated audio files
+const storyTexts = [
+    {
+        text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)",
+        audio: "audio1.wav"
+    },
+    {
+        text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
+        audio: "audio2.wav"
+    },
+    {
+        text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele",
+        audio: "audio3.wav"
+    },
+    {
+        text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz",
+        audio: "audio4.wav"
+    },
+    {
+        text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir",
+        audio: "audio5.wav"
+    },
+    {
+        text: "VERİLER İNDİRİLİYOR...\nLütfen bekle. Bu işlem biraz zaman alabilir.\n",
+        audio: "audio6.wav" // Audio to play when download starts
+    },
+    {
+        text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et",
+        audio: "audio7.wav" // New audio file
+    },
+    {
+        text: "VERİ ANALİZİ BAŞLATILIYOR...\n\n[SİSTEM] Şifreleme algoritmaları çözülüyor...\n[DURUM] Derinlemesine tarama yapılıyor...\n\n[ANALİZ SONUCU] NEXUS CORP'un sadece nanobot projesi değil, aynı zamanda küresel finans piyasalarını manipüle eden 'Project Midas' adında bir girişimi daha var!\n\n[GHOST] Bu bilgi çok değerli! Ama izimizi kaybettirmeliyiz. Sistemdeki logları ve bağlantı kayıtlarını temizlememiz şart.\n\nKomut: 'clear logs' yazarak izlerini sil",
+        audio: "audio8.wav" // New audio file
+    },
+    {
+        text: "İZ SİLME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Bağlantı logları siliniyor...\n[SİSTEM] Geçici dosyalar temizleniyor...\n[BAŞARILI] Tüm dijital ayak izlerin silindi!\n\n[UYARI] NEXUS CORP'un güvenlik önlemleri artırıldı! Yeni bir anti-hacker protokolü aktifleşti!\n\n[GHOST] Mükemmel zamanlama. Son bir görevimiz var: Acil durum kaçış protokolünü etkinleştirmek ve sistemden güvenle çıkmak. Aksi takdirde yakalanabiliriz!\n\nKomut: 'escape now' yazarak acil çıkış protokolünü başlat",
+        audio: "audio9.wav" // New audio file
+    },
+    {
+        text: "ACİL ÇIKIŞ PROTOKOLÜ BAŞLATILIYOR...\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa etme yolunda çok önemli bir adım attın ve kendini de güvende tuttun. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR...",
+        audio: "audio10.wav" // Changed to audio10.wav
+    }
+];
+
+/**
+ * Types out text character by character into a specified HTML element.
+ * @param {string} text The text to type.
+ * @param {string} elementId The ID of the HTML element where the text will be displayed.
+ * @param {function} [callback] An optional callback function to execute after typing is complete.
+ */
+async function typeText(text, elementId, callback) {
+    const element = document.getElementById(elementId);
+    element.innerHTML = ''; // Clear existing text
+    let i = 0;
+
+    function typeChar() {
+        if (i < text.length) {
+            if (text[i] === '\n') {
+                element.innerHTML += '<br>'; // Handle newlines
+            } else {
+                element.innerHTML += text[i];
+            }
+            i++;
+            setTimeout(typeChar, TYPING_SPEED + Math.random() * 20); // Add slight randomness for natural typing
+        } else {
+            // Remove existing cursor and add a new one if input area is visible
+            const existingCursor = element.querySelector('.cursor');
+            if (existingCursor) existingCursor.remove();
+            if (elementId === 'storyText' && document.getElementById('inputArea').style.display === 'flex') {
+                document.getElementById('commandInput').focus();
+            } else {
+                element.innerHTML += '<span class="cursor">_</span>'; // Add blinking cursor
+            }
+            if (callback) callback();
+        }
+    }
+    typeChar();
+}
+
+/**
+ * Advances the story based on the current `currentStoryIndex`.
+ * Handles displaying text, playing audio, and managing UI elements (input, download status).
+ */
+async function startStory() {
+    if (currentStoryIndex < storyTexts.length) {
+        const story = storyTexts[currentStoryIndex];
+
+        // Play audio and wait for it to finish
+        try {
+            await playVoiceAudio(story.audio);
+        } catch (e) {
+            console.log("Audio playback error, continuing with text display.");
+        }
+
+        if (currentStoryIndex === 5) { // "download all" komutundan sonraki indeks (audio6.wav)
+            isDownloading = true;
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('downloadStatus').style.display = 'block';
+            document.getElementById('downloadText').innerText = story.text;
+            startDownloadSimulation();
+        } else if (currentStoryIndex === 0) { // İlk "Hazır mısın?" aşaması (kullanıcı ENTER'a basmalı)
+            typeText(story.text, 'storyText', () => {
+                document.getElementById('inputArea').style.display = 'flex'; // Giriş alanını göster
+                document.getElementById('commandInput').focus(); // İmleci giriş alanına odakla
+            });
+        } else if (currentStoryIndex === storyTexts.length - 1) { // Son kapanış aşaması (otomatik ilerlemeli)
+            typeText(story.text, 'storyText', () => {
+                document.getElementById('inputArea').style.display = 'none'; // Giriş alanını gizle
+                setTimeout(() => {
+                    currentStoryIndex++;
+                    if (currentStoryIndex < storyTexts.length) {
+                        startStory();
+                    } else {
+                        alert('Tebrikler! Başarıyla tüm görevleri tamamladın ve dünyayı büyük bir tehlikeden korudun!');
+                        goBack(); // Görevler bitince ana menüye dön
+                    }
+                }, 2500); // Sonraki hikaye segmentinden önce kısa bir duraklama
+            });
+        } else { // Diğer tüm komut bekleyen aşamalar
+            typeText(story.text, 'storyText', () => {
+                document.getElementById('inputArea').style.display = 'flex'; // Giriş alanını göster
+                document.getElementById('commandInput').focus(); // İmleci giriş alanına odakla
+            });
+        }
+    }
+}
+
+/**
+ * Simulates a file download with a progress bar.
+ */
+function startDownloadSimulation() {
+    let startTime = Date.now();
+    let interval = setInterval(() => {
+        let elapsedTime = Date.now() - startTime;
+        downloadProgress = (elapsedTime / DOWNLOAD_DURATION) * 100;
+
+        document.getElementById('progressFill').style.width = `${downloadProgress}%`;
+        document.getElementById('downloadText').innerText = `VERİLER İNDİRİLİYOR...\nLütfen bekle. İlerleme: %${Math.floor(downloadProgress)}`;
+
+        if (downloadProgress >= 100) {
+            clearInterval(interval);
+            isDownloading = false;
+            document.getElementById('downloadStatus').style.display = 'none';
+            document.getElementById('missionStatus').style.display = 'block';
+            document.getElementById('missionStatus').innerHTML = '<span class="success">✅ İNDİRME TAMAMLANDI!</span>';
+            setTimeout(() => {
+                currentStoryIndex++;
+                startStory();
+                document.getElementById('missionStatus').style.display = 'none';
+            }, 1500);
+        }
+    }, DOWNLOAD_INTERVAL);
+}
+
+/**
+ * Handles user commands entered in the input field.
+ * @param {KeyboardEvent} event The keyboard event object.
+ */
+function handleCommand(event) {
+    if (event.key === 'Enter' && !isDownloading) {
+        const command = event.target.value.toLowerCase().trim();
+        const missionStatus = document.getElementById('missionStatus');
+        event.target.value = ''; // Clear input field
+
+        let commandHandled = false;
+
+        // Command handling logic based on current story index
+        if (currentStoryIndex === 0 && command === '') { // For the first "Press Enter" prompt
+            commandHandled = true;
+        } else if (currentStoryIndex === 1 && command.includes('port')) {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="success">✅ PORT SALDIRISI BAŞARILI!</span>';
+            commandHandled = true;
+        } else if (currentStoryIndex === 2 && command === 'ls') {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="success">✅ DOSYA LİSTESİ ALINDI!</span>';
+            commandHandled = true;
+        } else if (currentStoryIndex === 3 && command.includes('open')) {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="warning">⚠️ GİZLİ DOSYALAR ERİŞİLDİ!</span>';
+            commandHandled = true;
+        } else if (currentStoryIndex === 4 && command.includes('download all')) {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="success">✅ İNDİRME BAŞLATILIYOR...</span>';
+            commandHandled = true;
+        } else if (currentStoryIndex === 6 && command.includes('analyze data')) {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="success">✅ VERİ ANALİZİ BAŞLADI!</span>';
+            commandHandled = true;
+        } else if (currentStoryIndex === 7 && command.includes('clear logs')) {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="success">✅ İZLER TEMİZLENİYOR!</span>';
+            commandHandled = true;
+        } else if (currentStoryIndex === 8 && command.includes('escape now')) {
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="success">🎉 ACİL ÇIKIŞ BAŞARILI!</span>';
+            commandHandled = true;
+        } else {
+            // Invalid command feedback
+            missionStatus.style.display = 'block';
+            missionStatus.innerHTML = '<span class="error">❌ GEÇERSİZ KOMUT! Tekrar dene.</span>';
+            setTimeout(() => {
+                missionStatus.style.display = 'none';
+            }, 2000);
+            commandHandled = false;
+        }
+
+        // Advance story if command was successfully handled
+        if (commandHandled) {
+            document.getElementById('inputArea').style.display = 'none'; // Hide input
+            setTimeout(() => {
+                currentStoryIndex++;
+                startStory();
+                missionStatus.style.display = 'none'; // Clear mission status
+            }, 1500); // Short delay before next story segment
+        }
+    }
+}
+
+// Update canvas size on window resize
+window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    const characters = '01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ'; // Japanese Katakana and numbers
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = [];
-
-    // Initialize drops for Matrix effect
-    for (let i = 0; i < columns; i++) {
-        drops[i] = 1;
-    }
-
-    /**
-     * Draws the Matrix rain effect on the canvas.
-     */
-    function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#00ff00';
-        ctx.font = fontSize + 'px courier new';
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = characters.charAt(Math.floor(Math.random() * characters.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            // Send drop back to the top when it goes off screen
-            if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-            drops[i]++;
-        }
-    }
-
-    // Set interval for Matrix effect animation
-    setInterval(drawMatrix, 35);
-
-    /**
-     * Plays a voice audio file.
-     * @param {string} filename The name of the audio file to play (e.g., "audio.wav").
-     * @returns {Promise<void>} A Promise that resolves when the audio finishes playing.
-     */
-    function playVoiceAudio(filename) {
-        return new Promise((resolve, reject) => {
-            voiceAudio.src = filename;
-            voiceAudio.volume = 0.8; // Adjust volume as needed
-            voiceAudio.onended = () => resolve(); // Resolve Promise when audio ends
-            voiceAudio.onerror = (e) => {
-                console.error(`Error playing ${filename}:`, e);
-                reject(e);
-            };
-            voiceAudio.play().catch(e => {
-                console.warn(`Auto-play prevented for ${filename}. User interaction might be needed.`, e);
-                reject(e); // Reject Promise if playback fails (e.g., autoplay policy)
-            });
-        });
-    }
-
-    /**
-     * Plays or pauses the background music.
-     * @param {boolean} play True to play, false to pause.
-     */
-    function toggleBackgroundMusic(play) {
-        if (play) {
-            backgroundMusic.volume = 0.3; // Lower volume for background music
-            backgroundMusic.play().catch(e => {
-                console.warn("Background music auto-play prevented. User interaction might be needed.", e);
-            });
-        } else {
-            backgroundMusic.pause();
-        }
-    }
-
-    // Initial load and menu display
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-            // Attempt to start background music after first user interaction (e.g., loading screen completes)
-            toggleBackgroundMusic(true);
-        }, 3000);
-    });
-
-    /**
-     * Starts the game, hides main menu, shows game screen, and starts the story.
-     */
-    function startGame() {
-        document.getElementById('mainMenu').style.display = 'none';
-        document.getElementById('gameScreen').style.display = 'block';
-        toggleBackgroundMusic(true); // Continue playing music during game
-        startStory();
-    }
-
-    /**
-     * Shows the developer screen.
-     */
-    function showDeveloper() {
-        document.getElementById('mainMenu').style.display = 'none';
-        document.getElementById('developerScreen').style.display = 'block';
-        toggleBackgroundMusic(true); // Play music on developer screen too
-    }
-
-    /**
-     * Navigates back to the main menu and resets game state.
-     */
-    function goBack() {
-        document.getElementById('gameScreen').style.display = 'none';
-        document.getElementById('developerScreen').style.display = 'none';
-        document.getElementById('mainMenu').style.display = 'block';
-        currentStoryIndex = 0;
-        document.getElementById('inputArea').style.display = 'none';
-        document.getElementById('missionStatus').style.display = 'none';
-        document.getElementById('downloadStatus').style.display = 'none'; // Reset download status
-        isDownloading = false;
-        downloadProgress = 0;
-        document.getElementById('progressFill').style.width = '0%';
-        toggleBackgroundMusic(true); // Continue music on main menu
-    }
-
-    // Story data with text and associated audio files
-    const storyTexts = [
-        {
-            text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)",
-            audio: "audio.wav"
-        },
-        {
-            text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
-            audio: "audio2.wav"
-        },
-        {
-            text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele",
-            audio: "audio3.wav"
-        },
-        {
-            text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz",
-            audio: "audio4.wav"
-        },
-        {
-            text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir",
-            audio: "audio5.wav"
-        },
-        {
-            text: "VERİLER İNDİRİLİYOR...\nLütfen bekle. Bu işlem biraz zaman alabilir.\n",
-            audio: "audio6.wav" // Audio to play when download starts
-        },
-        {
-            text: "✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et",
-            audio: "audio7.wav" // New audio file
-        },
-        {
-            text: "VERİ ANALİZİ BAŞLATILIYOR...\n\n[SİSTEM] Şifreleme algoritmaları çözülüyor...\n[DURUM] Derinlemesine tarama yapılıyor...\n\n[ANALİZ SONUCU] NEXUS CORP'un sadece nanobot projesi değil, aynı zamanda küresel finans piyasalarını manipüle eden 'Project Midas' adında bir girişimi daha var!\n\n[GHOST] Bu bilgi çok değerli! Ama izimizi kaybettirmeliyiz. Sistemdeki logları ve bağlantı kayıtlarını temizlememiz şart.\n\nKomut: 'clear logs' yazarak izlerini sil",
-            audio: "audio8.wav" // New audio file
-        },
-        {
-            text: "İZ SİLME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Bağlantı logları siliniyor...\n[SİSTEM] Geçici dosyalar temizleniyor...\n[BAŞARILI] Tüm dijital ayak izlerin silindi!\n\n[UYARI] NEXUS CORP'un güvenlik önlemleri artırıldı! Yeni bir anti-hacker protokolü aktifleşti!\n\n[GHOST] Mükemmel zamanlama. Son bir görevimiz var: Acil durum kaçış protokolünü etkinleştirmek ve sistemden güvenle çıkmak. Aksi takdirde yakalanabiliriz!\n\nKomut: 'escape now' yazarak acil çıkış protokolünü başlat",
-            audio: "audio9.wav" // New audio file
-        },
-        {
-            text: "ACİL ÇIKIŞ PROTOKOLÜ BAŞLATILIYOR...\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa etme yolunda çok önemli bir adım attın ve kendini de güvende tuttun. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR...",
-            audio: "audio10.wav" // Can loop back to the first audio or play a final one
-        }
-    ];
-
-    /**
-     * Types out text character by character into a specified HTML element.
-     * @param {string} text The text to type.
-     * @param {string} elementId The ID of the HTML element where the text will be displayed.
-     * @param {function} [callback] An optional callback function to execute after typing is complete.
-     */
-    async function typeText(text, elementId, callback) {
-        const element = document.getElementById(elementId);
-        element.innerHTML = ''; // Clear existing text
-        let i = 0;
-
-        function typeChar() {
-            if (i < text.length) {
-                if (text[i] === '\n') {
-                    element.innerHTML += '<br>'; // Handle newlines
-                } else {
-                    element.innerHTML += text[i];
-                }
-                i++;
-                setTimeout(typeChar, TYPING_SPEED + Math.random() * 20); // Add slight randomness for natural typing
-            } else {
-                // Remove existing cursor and add a new one if input area is visible
-                const existingCursor = element.querySelector('.cursor');
-                if (existingCursor) existingCursor.remove();
-                if (elementId === 'storyText' && document.getElementById('inputArea').style.display === 'flex') {
-                    document.getElementById('commandInput').focus();
-                } else {
-                    element.innerHTML += '<span class="cursor">_</span>'; // Add blinking cursor
-                }
-                if (callback) callback();
-            }
-        }
-        typeChar();
-    }
-
-    /**
-     * Advances the story based on the current `currentStoryIndex`.
-     * Handles displaying text, playing audio, and managing UI elements (input, download status).
-     */
-    async function startStory() {
-        if (currentStoryIndex < storyTexts.length) {
-            const story = storyTexts[currentStoryIndex];
-
-            // Play audio and wait for it to finish
-            try {
-                await playVoiceAudio(story.audio);
-            } catch (e) {
-                console.log("Audio playback error, continuing with text display.");
-            }
-
-            if (currentStoryIndex === 5) { // Index after "download all" command (audio6.wav)
-                isDownloading = true;
-                document.getElementById('inputArea').style.display = 'none';
-                document.getElementById('downloadStatus').style.display = 'block';
-                document.getElementById('downloadText').innerText = story.text;
-                startDownloadSimulation();
-            } else if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length - 1) { // Intro and final closing stages
-                typeText(story.text, 'storyText', () => {
-                    document.getElementById('inputArea').style.display = 'none'; // Hide input for intro/outro
-                    setTimeout(() => {
-                        currentStoryIndex++;
-                        if (currentStoryIndex < storyTexts.length) {
-                            startStory();
-                        } else {
-                            alert('Tebrikler! Başarıyla tüm görevleri tamamladın ve dünyayı büyük bir tehlikeden korudun!');
-                            goBack(); // Return to main menu after completion
-                        }
-                    }, 2500); // Pause before next story segment
-                });
-            } else {
-                typeText(story.text, 'storyText', () => {
-                    document.getElementById('inputArea').style.display = 'flex'; // Show input for command stages
-                    document.getElementById('commandInput').focus();
-                });
-            }
-        }
-    }
-
-    /**
-     * Simulates a file download with a progress bar.
-     */
-    function startDownloadSimulation() {
-        let startTime = Date.now();
-        let interval = setInterval(() => {
-            let elapsedTime = Date.now() - startTime;
-            downloadProgress = (elapsedTime / DOWNLOAD_DURATION) * 100;
-
-            document.getElementById('progressFill').style.width = `${downloadProgress}%`;
-            document.getElementById('downloadText').innerText = `VERİLER İNDİRİLİYOR...\nLütfen bekle. İlerleme: %${Math.floor(downloadProgress)}`;
-
-            if (downloadProgress >= 100) {
-                clearInterval(interval);
-                isDownloading = false;
-                document.getElementById('downloadStatus').style.display = 'none';
-                document.getElementById('missionStatus').style.display = 'block';
-                document.getElementById('missionStatus').innerHTML = '<span class="success">✅ İNDİRME TAMAMLANDI!</span>';
-                setTimeout(() => {
-                    currentStoryIndex++;
-                    startStory();
-                    document.getElementById('missionStatus').style.display = 'none';
-                }, 1500);
-            }
-        }, DOWNLOAD_INTERVAL);
-    }
-
-    /**
-     * Handles user commands entered in the input field.
-     * @param {KeyboardEvent} event The keyboard event object.
-     */
-    function handleCommand(event) {
-        if (event.key === 'Enter' && !isDownloading) {
-            const command = event.target.value.toLowerCase().trim();
-            const missionStatus = document.getElementById('missionStatus');
-            event.target.value = ''; // Clear input field
-
-            let commandHandled = false;
-
-            // Command handling logic based on current story index
-            if (currentStoryIndex === 0 && command === '') { // For the first "Press Enter" prompt
-                commandHandled = true;
-            } else if (currentStoryIndex === 1 && command.includes('port')) {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="success">✅ PORT SALDIRISI BAŞARILI!</span>';
-                commandHandled = true;
-            } else if (currentStoryIndex === 2 && command === 'ls') {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="success">✅ DOSYA LİSTESİ ALINDI!</span>';
-                commandHandled = true;
-            } else if (currentStoryIndex === 3 && command.includes('open')) {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="warning">⚠️ GİZLİ DOSYALAR ERİŞİLDİ!</span>';
-                commandHandled = true;
-            } else if (currentStoryIndex === 4 && command.includes('download all')) {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="success">✅ İNDİRME BAŞLATILIYOR...</span>';
-                commandHandled = true;
-            } else if (currentStoryIndex === 6 && command.includes('analyze data')) {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="success">✅ VERİ ANALİZİ BAŞLADI!</span>';
-                commandHandled = true;
-            } else if (currentStoryIndex === 7 && command.includes('clear logs')) {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="success">✅ İZLER TEMİZLENİYOR!</span>';
-                commandHandled = true;
-            } else if (currentStoryIndex === 8 && command.includes('escape now')) {
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="success">🎉 ACİL ÇIKIŞ BAŞARILI!</span>';
-                commandHandled = true;
-            } else {
-                // Invalid command feedback
-                missionStatus.style.display = 'block';
-                missionStatus.innerHTML = '<span class="error">❌ GEÇERSİZ KOMUT! Tekrar dene.</span>';
-                setTimeout(() => {
-                    missionStatus.style.display = 'none';
-                }, 2000);
-                commandHandled = false;
-            }
-
-            // Advance story if command was successfully handled
-            if (commandHandled) {
-                document.getElementById('inputArea').style.display = 'none'; // Hide input
-                setTimeout(() => {
-                    currentStoryIndex++;
-                    startStory();
-                    missionStatus.style.display = 'none'; // Clear mission status
-                }, 1500); // Short delay before next story segment
-            }
-        }
-    }
-
-    // Update canvas size on window resize
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    });
+});
 </script>
 </body>
 </html>
