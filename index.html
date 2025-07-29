@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -238,13 +238,6 @@
 
     <script>
         let currentStoryIndex = 0;
-        // let currentMission = 1; // Not used currently, can remove or use for more complex mission tracking
-        // let playerData = { // Not used currently, can remove or use for more complex player tracking
-        //     name: "",
-        //     level: 1,
-        //     experience: 0,
-        //     completedMissions: []
-        // };
 
         // Matrix efekti
         const canvas = document.getElementById('matrix');
@@ -271,7 +264,7 @@
                 const text = characters.charAt(Math.floor(Math.random() * characters.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-                if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) { // Adjusted condition
+                if (drops[i] * fontSize * 0.8 > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
                 drops[i]++;
@@ -282,24 +275,23 @@
 
         // Ses çalma fonksiyonu
         function playAudio(audioName) {
-            // Ses dosyaları için placeholder - gerçek projede bu dosyalar eklenebilir
             console.log(`Playing audio: ${audioName}.wav`);
-            // Uncomment the following lines when you have your audio files:
-            // const audio = new Audio(`./audio/${audioName}.wav`); // Assuming audio files are in an 'audio' folder
-            // audio.play().catch(e => console.log('Audio play failed:', e));
+            // Klasör belirtmeden, index.html ile aynı dizindeki dosyayı çağırıyoruz.
+            const audio = new Audio(`${audioName}.wav`);
+            audio.play().catch(e => console.log('Audio play failed:', e));
         }
 
         // Başlangıç yüklemesi
         setTimeout(() => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'block';
-            playAudio('audio_intro'); // Renamed for clarity
+            playAudio('audio_intro'); // Ses dosyası: audio_intro.wav
         }, 3000);
 
         function startGame() {
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
-            playAudio('audio_start_game'); // Renamed for clarity
+            playAudio('audio_start_game'); // Ses dosyası: audio_start_game.wav
             startStory();
         }
 
@@ -312,39 +304,47 @@
             document.getElementById('gameScreen').style.display = 'none';
             document.getElementById('developerScreen').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'block';
-            currentStoryIndex = 0; // Reset story when going back to main menu
-            document.getElementById('inputArea').style.display = 'none'; // Hide input area
-            document.getElementById('missionStatus').style.display = 'none'; // Hide status
+            currentStoryIndex = 0;
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('missionStatus').style.display = 'none';
         }
 
         const storyTexts = [
             {
                 text: "SİSTEM BAŞLATILIYOR...\n\n[UYARI] Yetkisiz erişim tespit edildi.\n[BİLGİ] Güvenlik protokolleri devreye alınıyor...\n\nHoş geldin, genç hacker.\n\nBenim adım GHOST, siber dünyanın en gizli organizasyonunun yapay zekası. Seni buraya getiren sebep basit: dünyanın en büyük korporasyonu NEXUS CORP'un karanlık sırlarını açığa çıkarmak.\n\nİlk görevin: onların güvenlik duvarını aşmak ve gizli dosyalarına erişim sağlamak.\n\nHazır mısın? (Devam etmek için ENTER'a basın)",
-                audio: "audio_story_1"
+                audio: "audio_story_1" // audio_story_1.wav
             },
             {
                 text: "GÖREV 1: GİRİŞ KAPISI\n\n[SİSTEM] Target: nexus-corp.com:443\n[DURUM] Hedef sunucu taranıyor...\n\nTarama tamamlandı. Açık portlar tespit edildi:\n- Port 22 (SSH) - AÇIK\n- Port 80 (HTTP) - AÇIK  \n- Port 443 (HTTPS) - AÇIK\n- Port 3389 (RDP) - FİLTRELİ\n\nHangi portu kullanarak saldırıya geçmek istiyorsun?\nKomut gir: port [numara]",
-                audio: "audio_story_2"
+                audio: "audio_story_2" // audio_story_2.wav
             },
             {
                 text: "MÜKEMMEL SEÇİM!\n\n[SİSTEM] Port 22 üzerinden SSH bağlantısı kuruluyor...\n[BAŞARILI] Bağlantı kuruldu!\n\nŞimdi sisteme giriş yapmak için kullanıcı adı ve şifre bulmamız gerekiyor.\nSQL injection saldırısı başlatılıyor...\n\n[PAYLOAD] admin' OR '1'='1' --\n[SONUÇ] Giriş başarılı!\n\n**NEXUS CORP GİZLİ ARŞİVİ ERİŞİLDİ**\n\nİçeride neler var bakalım...\nKomut: 'ls' yazarak dosyaları listele",
-                audio: "audio_story_3"
+                audio: "audio_story_3" // audio_story_3.wav
             },
             {
                 text: "DOSYA LİSTESİ:\n\n📁 classified_projects/\n📁 financial_records/\n📁 employee_data/\n📁 secret_experiments/\n📄 master_plan.txt\n📄 backdoor_access.log\n\n[GHOST] Burada çok kritik bilgiler var. 'secret_experiments' klasörü çok şüpheli görünüyor.\n\nHangi dosyayı incelemek istiyorsın?\nKomut: 'open [dosya_adı]' şeklinde yaz",
-                audio: "audio_story_4"
+                audio: "audio_story_4" // audio_story_4.wav
             },
             {
                 text: "DOSYA AÇILIYOR: secret_experiments/\n\n🔴 ÜST GİZLİ - PROJE PANDORA 🔴\n\n[İÇERİK]\n- İnsan beynini kontrol eden nanobotlar\n- Küresel internet ağına hakimiyet projesi\n- Hükümetlerin gizli veritabanlarına erişim\n- Dünya geneli surveillance sistemi\n\n[GHOST] Bu korkunç! NEXUS CORP tüm dünyayı kontrol etmeye çalışıyor!\n\nBu bilgileri güvenli bir yere yedeklememiz gerekiyor.\nKomut: 'download all' yazarak tüm verileri indir",
-                audio: "audio_story_5"
+                audio: "audio_story_5" // audio_story_5.wav
             },
             {
-                text: "İNDİRME BAŞLADI...\n\n[████████████████████████████████] 100%\n\n✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem administrätörü şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Sistemden çıkmalıyız. Bu operasyon sayesinde dünyayı büyük bir tehlikeden korudun, genç hacker!\n\n(Devam etmek için ENTER'a basın)",
-                audio: "audio_story_6"
+                text: "İNDİRME BAŞLADI...\n\n[████████████████████████████████] 100%\n\n✅ TÜM DOSYALAR GÜVENLİ SUNUCUYA YEDEKLENDİ!\n\n[UYARI] Sistem yöneticisi şüpheli aktivite tespit etti!\n[ACİL] IP adresin izleniyor!\n\n[GHOST] Hızlı ol! Şimdi indirdiğimiz verileri analiz etmeliyiz. Neyin içine bulaştığımızı tam olarak anlamak için kritik bir adım.\n\nKomut: 'analyze data' yazarak verileri analiz et",
+                audio: "audio_story_6" // audio_story_6.wav
             },
             {
-                text: "GÖREV TAMAMLANDI!\n\nTebrikler, genç hacker! NEXUS CORP'un karanlık planlarını ortaya çıkardın ve insanlığı büyük bir tehlikeden korudun. GHOST olarak sana minnettarım.\n\nUnutma, gerçek güç bilgi ve onu doğru kullanma yeteneğindedir.\n\nSİSTEM KAPATILIYOR...",
-                audio: "audio_final"
+                text: "VERİ ANALİZİ BAŞLATILIYOR...\n\n[SİSTEM] Şifreleme algoritmaları çözülüyor...\n[DURUM] Derinlemesine tarama yapılıyor...\n\n[ANALİZ SONUCU] NEXUS CORP'un sadece nanobot projesi değil, aynı zamanda küresel finans piyasalarını manipüle eden 'Project Midas' adında bir girişimi daha var!\n\n[GHOST] Bu bilgi çok değerli! Ama izimizi kaybettirmeliyiz. Sistemdeki logları ve bağlantı kayıtlarını temizlememiz şart.\n\nKomut: 'clear logs' yazarak izlerini sil",
+                audio: "audio_story_7" // audio_story_7.wav
+            },
+            {
+                text: "İZ SİLME İŞLEMİ BAŞLATILIYOR...\n\n[SİSTEM] Bağlantı logları siliniyor...\n[SİSTEM] Geçici dosyalar temizleniyor...\n[BAŞARILI] Tüm dijital ayak izlerin silindi!\n\n[UYARI] NEXUS CORP'un güvenlik önlemleri artırıldı! Yeni bir anti-hacker protokolü aktifleşti!\n\n[GHOST] Mükemmel zamanlama. Son bir görevimiz var: Acil durum kaçış protokolünü etkinleştirmek ve sistemden güvenle çıkmak. Aksi takdirde yakalanabiliriz!\n\nKomut: 'escape now' yazarak acil çıkış protokolünü başlat",
+                audio: "audio_story_8" // audio_story_8.wav
+            },
+            {
+                text: "ACİL ÇIKIŞ PROTOKOLÜ BAŞLATILIYOR...\n\n[████████████████████████████████] 100%\n\n✅ SİSTEMDEN BAŞARILI BİR ŞEKİLDE ÇIKIŞ YAPILDI!\n\n[GHOST] Başardın, genç hacker! NEXUS CORP'u ifşa etme yolunda çok önemli bir adım attın ve kendini de güvende tuttun. Dünya sana minnettar.\n\nBu sadece başlangıç. Gelecekte daha büyük görevler seni bekliyor olabilir.\n\nSİSTEM KAPATILIYOR...",
+                audio: "audio_final" // audio_final.wav
             }
         ];
 
@@ -363,7 +363,6 @@
                     i++;
                     setTimeout(typeChar, 30 + Math.random() * 20);
                 } else {
-                    // Remove existing cursor before adding a new one for smooth blinking
                     const existingCursor = element.querySelector('.cursor');
                     if (existingCursor) existingCursor.remove();
                     element.innerHTML += '<span class="cursor">_</span>';
@@ -378,23 +377,20 @@
                 const story = storyTexts[currentStoryIndex];
                 playAudio(story.audio);
 
-                // For the first story item, automatically advance after a delay
-                if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length -1) { // Also for the final "System Shutting Down" message
+                if (currentStoryIndex === 0 || currentStoryIndex === storyTexts.length - 1) {
                     typeText(story.text, 'storyText', () => {
-                        document.getElementById('inputArea').style.display = 'none'; // Hide input for intro/outro
+                        document.getElementById('inputArea').style.display = 'none';
                         setTimeout(() => {
                             currentStoryIndex++;
                             if (currentStoryIndex < storyTexts.length) {
                                 startStory();
                             } else {
-                                // End of game
                                 alert('Tebrikler! Başarıyla tüm görevleri tamamladın ve dünyayı büyük bir tehlikeden korudun!');
                                 goBack();
                             }
-                        }, 2500); // Wait a bit longer for the intro/outro
+                        }, 2500);
                     });
                 } else {
-                    // For interactive story items, show input after typing
                     typeText(story.text, 'storyText', () => {
                         document.getElementById('inputArea').style.display = 'flex';
                         document.getElementById('commandInput').focus();
@@ -407,7 +403,7 @@
             if (event.key === 'Enter') {
                 const command = event.target.value.toLowerCase().trim();
                 const missionStatus = document.getElementById('missionStatus');
-                event.target.value = ''; // Clear input immediately
+                event.target.value = '';
 
                 let commandHandled = false;
 
@@ -431,8 +427,21 @@
                     missionStatus.innerHTML = '<span class="success">✅ VERİLER İNDİRİLİYOR...</span>';
                     commandHandled = true;
                 }
-                // Removed the 'create backdoor' command to align with safety guidelines.
-                // The story now concludes after downloading data and escaping.
+                else if (currentStoryIndex === 5 && command.includes('analyze data')) {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="success">✅ VERİ ANALİZİ BAŞLADI!</span>';
+                    commandHandled = true;
+                }
+                else if (currentStoryIndex === 6 && command.includes('clear logs')) {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="success">✅ İZLER TEMİZLENİYOR!</span>';
+                    commandHandled = true;
+                }
+                else if (currentStoryIndex === 7 && command.includes('escape now')) {
+                    missionStatus.style.display = 'block';
+                    missionStatus.innerHTML = '<span class="success">🎉 ACİL ÇIKIŞ BAŞARILI!</span>';
+                    commandHandled = true;
+                }
                 else {
                     missionStatus.style.display = 'block';
                     missionStatus.innerHTML = '<span class="error">❌ GEÇERSİZ KOMUT! Tekrar dene.</span>';
@@ -443,7 +452,7 @@
                 }
 
                 if (commandHandled) {
-                    document.getElementById('inputArea').style.display = 'none'; // Hide input after successful command
+                    document.getElementById('inputArea').style.display = 'none';
                     setTimeout(() => {
                         currentStoryIndex++;
                         startStory();
